@@ -25,7 +25,7 @@ Activate the new environment:
 conda activate evaluating-deeplight-transfer
 ```
 
-Install `deeplight` and `hcprep` with pip3:
+Install `deeplight`, `hcprep`, and `modules` with pip3:
 ```bash
 pip3 install -e .
 ```
@@ -54,7 +54,7 @@ Choose the region based on your [location](https://docs.aws.amazon.com/AmazonRDS
 - `task_id`, `subject_id`, `run_id`: numerical id of task, subject, run
 - `tr`: TR of each volume
 - `state`: numerical label of cognive state of volume within its task (e.g., [0,1,2,3] for the four cognitive states of the WM task)
-- `onehot`: one-hot encoding of the state across all tasks that are used for training (e.g., there are 20 cognitive tasks across the seven tasks of the HCP; the four cognitive states of the WM task could thus be mapped to the last four positions of the one-hot encoding [16, 17, 18, 19])
+- `onehot`: one-hot encoding of the state across all tasks that are used for training (e.g., there are 20 cognitive tasks across the seven tasks of the HCP; the four cognitive states of the WM task could thus be mapped to the last four positions of the one-hot encoding, with index [16, 17, 18, 19])
 
 Note that `hcprep` also provides basic descriptive information about the HCP task-fMRI data in `info.basics`:
 
