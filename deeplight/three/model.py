@@ -53,9 +53,10 @@ class model(object):
       batch_size=self.batch_size, return_logits=self.return_logits)
 
     if self.pretrained:
+      # define path to pre-trained weights
       self._path_pretrained_weights = os.path.join(os.path.dirname(deeplight.__file__),
         'three', 'pretrained_model', 'model-3D_DeepLight_desc-pretrained_model.hdf5')
-      # set to pretrained weights
+      # set model weights to pre-trained weights
       self.load_weights(self._path_pretrained_weights)
 
   def load_weights(self, path: str):
@@ -147,7 +148,7 @@ class model(object):
       warnings.warning('"'"return_logits"'" should be set to "'"True"'" when computing LRP.')
     if self.verbose:
       print("\tSetting up LRP analyzer..")
-    # rebuild model in keras
+    # rebuild model in keras (required for iNNvestigate)
     analyzer_model = _init_model(
       keras=keras,
       input_shape=self.input_shape,
