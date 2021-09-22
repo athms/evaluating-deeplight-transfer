@@ -31,8 +31,6 @@ class model(object):
         verbose (bool, optional): Comment current program stages? Defaults to True.
         name (str, optional): Name of the model. Defaults to '2D'.
     """
-
-    # make model
     self.architecture = name
     self.pretrained = pretrained
     self.input_shape = (91,109,91,1) # MNI152NLin6Asym
@@ -48,17 +46,14 @@ class model(object):
       print('\tn-states: {}'.format(self.n_states))
       print('\tbatch-size: {}'.format(self.batch_size))
     
-    # define placeholders
     with tf.variable_scope('placeholder'):
       self._conv_keep_probs = tf.placeholder(tf.float32, [3])
       self._keep_prob = tf.placeholder(tf.float32, [])
 
-    # init session
     self.sess = tf.Session()
-    
-    # init model
+
     with tf.variable_scope('model'):
-      # setup model
+      # init model
       self.model = _init_model(input_shape=self.input_shape,
           n_classes=self.n_states, batch_size=self.batch_size,
           conv_keep_probs=self._conv_keep_probs, keep_prob=self._keep_prob,
@@ -71,11 +66,11 @@ class model(object):
     # init variables
     self.sess.run(tf.global_variables_initializer())
 
-    # path to pretrained weights
+    # path to pre-trained weights
     self._path_pretrained_tvars = os.path.join(os.path.dirname(deeplight.__file__),
-    'two', 'pretrained_model', 'model-2D_DeepLight_desc-pretrained_model.npy')
+      'two', 'pretrained_model', 'model-2D_DeepLight_desc-pretrained_model.npy')
     if self.pretrained:
-      # load pretrained weights
+      # load pre-trained weights
       self.load_weights(self._path_pretrained_tvars)
 
   def load_weights(self, path, verbose=None):
