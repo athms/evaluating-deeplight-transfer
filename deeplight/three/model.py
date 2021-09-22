@@ -7,7 +7,6 @@ import keras
 import innvestigate
 from ._architecture import _init_model
 from ._fit import _fit
-from ._lrp import _make_analyzer
 import deeplight
 
 

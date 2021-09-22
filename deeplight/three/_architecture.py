@@ -12,7 +12,6 @@ def _init_model(keras, input_shape: int, n_classes: int, batch_size: int, return
 
 
   model.add(keras.layers.Conv3D(8, 3, strides=1,
-    # input_shape=(nz, ny, nx, 1),
     padding='same',
     data_format='channels_last',
     activation='relu'))
@@ -20,7 +19,6 @@ def _init_model(keras, input_shape: int, n_classes: int, batch_size: int, return
   model.add(keras.layers.BatchNormalization())
 
   model.add(keras.layers.Conv3D(8, 3, strides=1,
-    # input_shape=(nz, ny, nx, 1),
     padding='same',
     data_format='channels_last',
     activation='relu'))

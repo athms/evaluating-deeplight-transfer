@@ -8,7 +8,7 @@ def _make_analyzer(model, input_shape, n_classes, batch_size, add_softmax=False)
   """Setup LRP analyzer for 3D-DeepLight."""
   # rebuild model in keras
   analyzer_model = _init_model(keras, input_shape, n_classes, batch_size, add_softmax=False)
-  # define relevence computation
+  # define relevence computation with iNNvestigate
   return innvestigate.analyzer.relevance_based.relevance_analyzer.LRPSequentialPresetBFlat(
     model=analyzer_model,
     neuron_selection_mode="index",
