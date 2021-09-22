@@ -46,7 +46,6 @@ class LSTM(Module):
         self.dim = dim  # n output features
         self.seq_length = sequence_length
 
-        # training mechanics
         self.batch_size = batch_size
         self.input_keep_prob = input_keep_prob
         self.output_keep_prob = output_keep_prob
@@ -70,14 +69,10 @@ class LSTM(Module):
                                                 _dropout_check_false)
 
         # initialze weights
-        self.Wxh = tf.get_variable(self.name+'/weights_xh', shape=[4 * self.dim, self.input_dim],
-                                    initializer=weights_init)
-        self.bxh = tf.get_variable(self.name+'/biases_xh', shape=[4 * self.dim],
-                                    initializer=bias_init)
-        self.Whh = tf.get_variable(self.name+'/weights_hh', shape=[4 * self.dim, self.dim],
-                                    initializer=weights_init)
-        self.bhh = tf.get_variable(self.name+'/biases_hh', shape=[4 * self.dim],
-                                    initializer=bias_init)
+        self.Wxh = tf.get_variable(self.name+'/weights_xh', shape=[4 * self.dim, self.input_dim], initializer=weights_init)
+        self.bxh = tf.get_variable(self.name+'/biases_xh', shape=[4 * self.dim], initializer=bias_init)
+        self.Whh = tf.get_variable(self.name+'/weights_hh', shape=[4 * self.dim, self.dim], initializer=weights_init)
+        self.bhh = tf.get_variable(self.name+'/biases_hh', shape=[4 * self.dim], initializer=bias_init)
         self.W = tf.concat([self.Wxh, self.Whh], axis=1)
 
         # i, f, o gate weight indices
@@ -92,11 +87,10 @@ class LSTM(Module):
 
     def _init_cell(self):
       """Initialze cell."""
-      # initialze state (c) / output (h)
       self.h = [tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)]
       self.c = [tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)]
       self.h_out = [tf.zeros((self.batch_size, 1, self.dim*2)) for _ in range(self.seq_length)]
-      # containers to store gate states over input sequence
+
       self.gates_xh = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
       self.gates_hh = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
       self.gates_pre = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
@@ -119,9 +113,9 @@ class LSTM(Module):
         self._init_cell()
 
         # set input
-        # make sure input has right dimensions
+        # make sure input has right dimension
         if len(x.get_shape().as_list()) != 3:
-          self.x = tf.reshape(x, [-1, self.seq_length, self.input_dim])  # self.batch_size
+          self.x = tf.reshape(x, [-1, self.seq_length, self.input_dim])
         else:
           self.x = x
 
@@ -133,7 +127,6 @@ class LSTM(Module):
         # iterate over sequence
         for t in range(self.seq_length):
 
-          # propagation step
           x_t = tf.nn.dropout(tf.gather(self.x_time_first, t), keep_prob=self.input_keep_prob_tensor)
 
           self.gates_xh[t] = tf.matmul( self.Wxh, x_t) + tf.expand_dims(self.bxh, 1)
@@ -149,7 +142,6 @@ class LSTM(Module):
           self.h[t] = o_gate*tf.tanh(self.c[t])
           self.gates[t] = tf.concat([i_gate, j_gate, f_gate, o_gate], axis=0)
 
-          # reshape activations
           h_out = tf.transpose(tf.nn.dropout(self.h[t], keep_prob=self.output_keep_prob_tensor))
 
         return h_out
@@ -191,14 +183,12 @@ class LSTM(Module):
       self.gates = None
 
     def _lrp(self, R):
-      """LRP impelmentation."""
-      # initialze containers
+      """LRP implementation."""
       self.Rx = [tf.zeros((self.dim, self.batch_size))] * self.seq_length
       self.Rh = [tf.zeros((self.dim, self.batch_size))] * (self.seq_length+1)
       self.Rc = [tf.zeros((self.dim, self.batch_size))] * (self.seq_length+1)
       self.Rg = [tf.zeros((self.dim, self.batch_size))] * (self.seq_length)
 
-      # set lrp variables
       self.R = tf.transpose(R)
 
       # set sample relevances as "output"-relevance for each pass
@@ -220,7 +210,7 @@ class LSTM(Module):
         j_gate_pre = tf.gather(self.gates_pre[t], self.j_idx)
         j_gate_pre = tf.gather(self.gates_pre[t], self.j_idx)
 
-        # compute sequence step
+        # step
         self.Rc[t] += self.Rh[t]
         self.Rc[t-1] = self.propagation_rule(f_gate * self.c[t-1],
                                               tf.eye((self.dim)),
@@ -298,18 +288,17 @@ class LSTM_bidirectional(Module):
 
       # initialize weights / biases
       with tf.name_scope(self.name):
-        # initialize shape variables
+
         self.input_dim = input_dim  # n features
         self.dim = dim  # dim of embedding
         self.seq_length = sequence_length
 
-        # training mechanics
         self.batch_size = batch_size
         self.input_keep_prob = input_keep_prob
         self.output_keep_prob = output_keep_prob
         self.forget_bias = forget_bias
 
-        # init fw LSTM cells
+        # init fw LSTM cell
         self.fw_cell = LSTM(dim,
                             batch_size=self.batch_size,
                             input_dim=self.input_dim,
@@ -321,7 +310,7 @@ class LSTM_bidirectional(Module):
                             forget_bias=self.forget_bias,
                             name="lstm_fw")
 
-        # init bw LSTM cells
+        # init bw LSTM cell
         self.bw_cell = LSTM(dim,
                             batch_size=self.batch_size,
                             input_dim=self.input_dim,

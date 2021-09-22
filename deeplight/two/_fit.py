@@ -36,7 +36,7 @@ def _fit(self,
     shuffle_buffer_size=shuffle_buffer_size,
     n_workers=n_workers)
 
-  # make iterator
+  # make initializable iterator
   iterator = dataset.make_initializable_iterator()
   
   # extract volume and state-onehot
@@ -82,19 +82,19 @@ def _fit(self,
     print('\n\nTraining epoch: {}'.format(epoch))
   
     # training data:
-    xe_train = 0
-    acc_train = 0
+    xe_train, acc_train = 0, 0 # rolling cross-entropy and accuracy
     # shuffle files
     np.random.shuffle(train_files)
-    # initailize trainings iterator
+    # initailize training iterator with train_files
     self.sess.run(iterator.initializer, feed_dict={files: train_files})
     # iterate batches
     with tqdm(total=training_steps) as pbar:
       for step_train in range(1,training_steps+1):
         try:
+          # GD step
           _, batch_acc, batch_xe = self.sess.run([optimizer_step, accuracy, avg_Xentropy],
             feed_dict={self._keep_prob: 0.5, self._conv_keep_probs: np.array([1, .8, .6])})
-          # print mean XE and ACC
+          # rolling XE and ACC
           xe_train += batch_xe
           acc_train += batch_acc
           pbar.set_description(
@@ -108,16 +108,16 @@ def _fit(self,
           break
 
     # validation data:
-    xe_val = 0
-    acc_val = 0
-    # initailize trainings iterator
+    xe_val, acc_val = 0, 0 # rolling cross-entropy and accuracy
+    # initailize validation iterator with validation_files
     self.sess.run(iterator.initializer, feed_dict={files: validation_files})
     # iterate batches
     for step_val in range(1,validation_steps+1):
       try:
+        # get batch accuracy / XE
         batch_acc, batch_xe = self.sess.run([accuracy, avg_Xentropy],
           feed_dict={self._keep_prob: 1, self._conv_keep_probs: np.ones(3)})
-        # print mean XE and ACC
+        # rolling XE and ACC
         xe_val += batch_xe
         acc_val += batch_acc
       except tf.errors.DataLossError:
