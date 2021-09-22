@@ -18,10 +18,10 @@ def main():
   args = vars(ap.parse_args())
   path = str(args['path'])
   
-  # extract subject IDs from path
+  # extract subject ids
   subjects = [int(f.split('sub-')[1]) for f in os.listdir(path) if 'sub' in f]
 
-  # get HCP data information
+  # get hcp data info
   hcp_info = hcprep.info.basics()
 
   print('Processing {} subjects with {} runs per task.\n'.format(len(subjects), len(hcp_info.runs)))

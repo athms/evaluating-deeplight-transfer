@@ -56,11 +56,11 @@ def main():
   else:
     out_path = str(args.out)
 
-  # get HCP data info
+  # get HCP info
   hcp_info = hcprep.info.basics()
 
-  # check that training tasks correctly specifie
-  training_tasks = np.unique(training_tasks) # make sure no doublings!
+  # check if training tasks correctly specified
+  training_tasks = np.unique(training_tasks) # make sure no repetitions
   for task in training_tasks:
     if task not in hcp_info.tasks:
       raise ValueError('{} not in {}'.format(task, hcp_info.tasks))
@@ -81,10 +81,10 @@ def main():
   # how many cognitive states are there in the training data?
   n_states_training = np.sum([hcp_info.n_states_per_task[task] for task in training_tasks])
   
-  # get subject IDs from data_path
+  # get subject ids from data_path
   subjects = np.sort(np.unique([int(p.split('sub-')[1]) for p in os.listdir(data_path) if p.startswith('sub-')]))
 
-  # assign subjects to training / validation data (66 / 33%)
+  # assign subjects to training / validation data (2 / 1)
   subjects_training = np.random.choice(subjects, np.int(subjects.size*2/3.), replace=False)
   subjects_validation = np.array([s for s in subjects if s not in subjects_training])
   print('\nRandom subject split: ')
@@ -110,7 +110,7 @@ def main():
         if os.path.isfile(filepath): # make sure file exists
           validation_files.append(filepath)
 
-  # make DeepLight model
+  # make model
   if architecture == '3D':
     deeplight_variant = deeplight.three.model(
       n_states=n_states_training,
@@ -129,7 +129,7 @@ def main():
   # fit DeepLight; save models to output_path during training
   fit_history = deeplight_variant.fit(train_files=train_files,
                                       validation_files=validation_files,
-                                      n_onehot=20, # there are 20 values in the onehot encoding of the HCP TFR files (one for each of the 20 cognitive states)
+                                      n_onehot=20, # there are 20 values in the onehot encoding of the HCP TFR files (one for each of the 20 cognitive states of the HCP data)
                                       # of these 20 onehot values we only care about those belonging to the current training task:
                                       onehot_idx=np.sort(np.concatenate([hcp_info.onehot_idx_per_task[t] for t in training_tasks])), 
                                       learning_rate=learning_rate,

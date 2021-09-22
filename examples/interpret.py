@@ -57,14 +57,14 @@ def main():
   if verbose:
     print('\nSaving results to: {}'.format(sub_out_path))
 
-  # load subject func img
+  # load subject func img & mask
   sub_bold_img = image.load_img(hcprep.paths.path_bids_func_mni(subject, task, run, data_path))
   sub_bold_mask = image.load_img(hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path))
 
-  # get TFR file
+  # get tfr file path
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
-  # make TFR iterable dataset
+  # make dataset
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
@@ -72,12 +72,11 @@ def main():
     repeat=False,
     n_workers=2)
   
-  # make iterator from dataset
+  # make iterator
   iterator = dataset.make_initializable_iterator()
-  # get iterator entries
   iterator_features = iterator.get_next()
 
-  # make DeepLight model
+  # make model
   if architecture == '3D':
     deeplight_variant = deeplight.three.model(
       batch_size=1,
@@ -108,7 +107,7 @@ def main():
   n = 0
   while True:
     try:
-      # get volume info from TFR
+      # get samples from iterator
       (batch_volume,
        batch_trs,
        batch_state,
@@ -140,18 +139,18 @@ def main():
   trs = np.concatenate(trs)
   states = np.concatenate(states)
   relevances = np.concatenate([np.expand_dims(r, 0) for r in relevances], axis=0)
-  # we also transpose relevances, as DeepLight outputs relevances in shape (nz, ny, nx, 1)
+  # we transpose relevances, as DeepLight outputs relevances in shape (nz, ny, nx, 1)
   relevances = relevances.T[0]
 
-  # sort relevances by and states by trs
+  # sort relevances / states by TR
   tr_idx = np.argsort(trs)
   relevances = relevances[...,tr_idx]
   states = states[tr_idx]
 
-  # make img of relevance data
+  # make niimg of relevance data
   sub_relevance_img = image.new_img_like(sub_bold_img, relevances)
   
-  # save image to sub_out_path
+  # save niimg to sub_out_path
   sub_relevance_img.to_filename(
     sub_out_path+'sub-{}_task-{}_run-{}_desc-relevances.nii.gz'.format(
       subject, task, run))
@@ -167,12 +166,12 @@ def main():
       state_relevance_img = image.smooth_img(state_relevance_img, fwhm=6)
       # average for cognitive state
       mean_state_relevance_img = image.mean_img(state_relevance_img)
-      # save relevances for state
+      # save state relevance niimg
       mean_state_relevance_img.to_filename(
         sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevances.nii.gz'.format(
           subject, task, run, state))
       
-      # extract 95 percentile threshold
+      # extract 95 percentile threshold for plotting
       threshold = np.percentile(masking.apply_mask(mean_state_relevance_img, sub_bold_mask), 95)
       
       # plot surface brainmap
@@ -183,12 +182,12 @@ def main():
                                 colorbar=True,
                                 cmap='inferno',
                                 threshold=threshold);
-      # save brainmap to subject-specific dir
+      # save brainmap to sub_out_path
       plt.savefig(sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_surf_brainmap.png'.format(
         subject, task, run, state), dpi=200)
       plt.clf() # close fig
       
-      # also plot axial slices:
+      # also plot axial slices
       plotting.plot_stat_map(mean_state_relevance_img, display_mode='z', cut_coords=30, cmap=plt.cm.seismic, threshold=threshold)
       plt.savefig(sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_axial_slices.png'.format(
         subject, task, run, state), dpi=200)

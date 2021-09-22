@@ -63,14 +63,14 @@ def main():
   if verbose:
     print('\nSaving predictions to: {}'.format(sub_out_path))
 
-  # load subject func img
+  # load subject func img & mask
   sub_bold_img = image.load_img(hcprep.paths.path_bids_func_mni(subject, task, run, data_path))
   sub_bold_mask = image.load_img(hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path))
 
-  # get TFR file
+  # get TFR filepath
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
-  # make TFR iterable dataset
+  # make dataset from tfr_file
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
@@ -80,10 +80,9 @@ def main():
 
   # make iterator
   iterator = dataset.make_initializable_iterator()
-  # get iterator entry
   iterator_features = iterator.get_next()
 
-  # make DeepLight model
+  # make model
   if architecture == '3D':
     deeplight_variant = deeplight.three.model(
       batch_size=batch_size,
@@ -99,7 +98,7 @@ def main():
   else:
       raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
 
-  # init tensorflow session
+  # init session
   sess = tf.Session()
   sess.run(iterator.initializer)
 
