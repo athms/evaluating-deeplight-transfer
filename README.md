@@ -88,7 +88,7 @@ Both deeplight architectures implement basic `fit`, `decode`, and `interpret` fu
 
 For further methdological details regarding the two DeepLight architectures, see the upcoming preprint.
 
-**Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to an increased memory demand (assuming that the available CPU memory is larger than the available GPU memory). This can be achieved by setting the environment variable to `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
+**Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to an increased memory demand (assuming that the available CPU memory is larger than the available GPU memory). This can be achieved by setting the environment variable to bash```export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
 
 
 ## 4. Example scripts
