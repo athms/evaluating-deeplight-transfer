@@ -23,11 +23,15 @@ class LSTM(Module):
           dim (int): Dim of hidden embedding.
           input_dim (int, optional): Size of input.
           batch_size (int, optional): Batch size. Defaults to 32.
-          weights_init (weight initializer, optional): initializer for weights. Defaults to tf.truncated_normal_initializer(stddev=0.01).
-          bias_init (weight initializer, optional): initializer for biases. Defaults to tf.constant_initializer(0.0).
+          weights_init (weight initializer, optional): initializer for weights.
+            Defaults to tf.truncated_normal_initializer(stddev=0.01).
+          bias_init (weight initializer, optional): initializer for biases.
+            Defaults to tf.constant_initializer(0.0).
           sequence_length (int, optional): Length of sequence. Defaults to None.
-          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input . Defaults to 1.0.
-          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output. Defaults to 1.0.
+          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input.
+            Defaults to 1.0.
+          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output.
+            Defaults to 1.0.
           forget_bias (float, optional): Bias of forget gate. Defaults to 1.0.
           reverse_input (bool, optional): Whether LSTM iterates through sequence 
               from beginning-to_end or end-to-beginning. Defaults to False.
