@@ -127,10 +127,8 @@ def main():
   trs = np.concatenate(trs)
   states = np.concatenate(states)
   relevances = np.concatenate([np.expand_dims(r, -1) for r in relevances], axis=-1)
-  # we transpose relevances, as DeepLight outputs relevances in shape (nz, ny, nx, 1)
-  # relevances = relevances.T[0]
 
-  # sort relevances / states by their TR#
+  # sort relevances / states by their TR
   tr_idx = np.argsort(trs)
   relevances = relevances[...,tr_idx]
   states = states[tr_idx]
