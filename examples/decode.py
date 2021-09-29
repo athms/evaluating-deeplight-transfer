@@ -21,7 +21,8 @@ def main():
   ap.add_argument("--pretrained", required=False, default=1,
                   help="use pre-trained model? (1: True or 0: False) (default: 1)")
   ap.add_argument("--task", required=False, default='MOTOR',
-                  help="which HCP task? (EMOTION, GAMBLING, LANGUAGE, SOCIAL, MOTOR, RELATIONAL)? (default: MOTOR)")
+                  help="which HCP task? (EMOTION, GAMBLING, LANGUAGE,"\
+                    "SOCIAL, MOTOR, RELATIONAL)? (default: MOTOR)")
   ap.add_argument("--subject", required=False, default=100307, 
                   help="which subject? (default: 100307)")
   ap.add_argument("--run", required=False, default='LR', 
@@ -50,7 +51,8 @@ def main():
     print('"out" not defined. Defaulting to: {}'.format(out_path))
 
   # make sure task specification is valid
-  assert task in ['EMOTION', 'LANGUAGE', 'SOCIAL', 'GAMBLING', 'MOTOR', 'RELATIONAL'], 'Invalid task; only pre-training tasks valid (all HCP tasks, except for WM)!'
+  assert task in ['EMOTION', 'LANGUAGE', 'SOCIAL', 'GAMBLING', 'MOTOR', 'RELATIONAL'],\
+    'Invalid task; only pre-training tasks valid (all HCP tasks, except for WM)!'
 
   hcp_info = hcprep.info.basics()
 
@@ -97,7 +99,9 @@ def main():
   predictions = [] 
   while True:
     try:
-      tr, onehot, volume = sess.run((iterator_features['tr'], iterator_features['onehot'], iterator_features['volume']))
+      tr, onehot, volume = sess.run((iterator_features['tr'],
+                                     iterator_features['onehot'],
+                                     iterator_features['volume']))
       pred = deeplight_variant.decode(volume)
       for ii in range(tr.shape[0]):
           predictions.append(pd.DataFrame({'subject': subject,
