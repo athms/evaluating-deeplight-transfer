@@ -69,6 +69,9 @@ def main():
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
+    # we neglect the last 4 onehot entries, as these belong to the WM task, 
+    # which is not part of the pre-training data (see hcp_info.onehot_idx_per_task):
+    onehot_idx=np.arange(16), 
     batch_size=batch_size,
     repeat=False,
     n_workers=2)
