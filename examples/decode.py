@@ -69,8 +69,7 @@ def main():
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
     batch_size=batch_size,
     repeat=False,
-    n_workers=2,
-    transpose_xyz=True) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
+    n_workers=2) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
 
   iterator = dataset.make_initializable_iterator()
   iterator_features = iterator.get_next()

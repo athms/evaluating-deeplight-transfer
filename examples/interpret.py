@@ -63,8 +63,7 @@ def main():
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
     batch_size=1, # to save memory, we process 1 sample at a time!
     repeat=False,
-    n_workers=2,
-    transpose_xyz=True) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
+    n_workers=2) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
   
   iterator = dataset.make_initializable_iterator()
   iterator_features = iterator.get_next()
@@ -124,7 +123,7 @@ def main():
   states = np.concatenate(states)
   relevances = np.concatenate([np.expand_dims(r, 0) for r in relevances], axis=0)
   # we transpose relevances, as DeepLight outputs relevances in shape (nz, ny, nx, 1)
-  relevances = relevances.T[0]
+  # relevances = relevances.T[0]
 
   # sort relevances / states by their TR
   tr_idx = np.argsort(trs)
