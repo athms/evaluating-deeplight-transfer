@@ -113,10 +113,10 @@ class model(object):
     """Decode cognitive states for volume.
 
     Args:
-        volume (Tensor): Input volume with shape (batch-size, nx, ny, nz)
+        volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
-        ndarray: Logits (or softmax), n x n_states
+        array: Logits (or softmax), n x n_states
     """
     volume = self._add_channel_dim(volume)
     volume = self._tranpose_volumes(volume)
@@ -199,7 +199,7 @@ class model(object):
         volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
-        relevances: relevance values for each voxel of volume
+        array: relevance values for each voxel of volume
     """
     if self._R is None:
       raise NotImplementedError('LRP is not initialized. Please call .setup_lrp() first.')

@@ -88,7 +88,7 @@ class model(object):
         volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
-        ndarray: Logits (or softmax), n x n_states
+        array: Logits (or softmax), n x n_states
     """
     volume = self._add_channel_dim(volume)
     volume = self._tranpose_volumes(volume)
@@ -183,7 +183,7 @@ class model(object):
         volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
-        relevances: relevance values for each voxel of volume
+        array: relevance values for each voxel of volume
     """
     pred_batch = self.decode(volume).argmax(axis=1)
     volume = self._add_channel_dim(volume)
