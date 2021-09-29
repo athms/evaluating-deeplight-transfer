@@ -61,9 +61,6 @@ def main():
   if verbose:
     print('\nSaving predictions to: {}'.format(sub_out_path))
 
-  sub_bold_img = image.load_img(hcprep.paths.path_bids_func_mni(subject, task, run, data_path))
-  sub_bold_mask = image.load_img(hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path))
-
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
   dataset = deeplight.data.io.make_dataset(
