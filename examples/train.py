@@ -8,10 +8,8 @@ import hcprep
 
 def main():
 
-  # random seed
   np.random.seed(8170)
 
-  # parse arguments
   ap = argparse.ArgumentParser()
   ap.add_argument("--data", required=False, default='../data/',
                   help="path to TFR data files (default: ../data/)")
@@ -37,8 +35,8 @@ def main():
                   help="path where epoch models are saved during training")
   ap.add_argument("--verbose", required=False, default=1,
                   help="comment training with prints in terminal (0: no or 1: yes) (default: 1)")
+  
   args = ap.parse_args()
-  # set variables
   architecture = str(args.architecture)
   pretrained = bool(int(args.pretrained))
   training_tasks = list(args.training_tasks)
@@ -56,7 +54,6 @@ def main():
   else:
     out_path = str(args.out)
 
-  # get HCP info
   hcp_info = hcprep.info.basics()
 
   # check if training tasks correctly specified
@@ -65,10 +62,8 @@ def main():
     if task not in hcp_info.tasks:
       raise ValueError('{} not in {}'.format(task, hcp_info.tasks))
 
-  # make sure path for saving models exists
   os.makedirs(out_path, exist_ok=True)
 
-  # print training settings
   print("\nTraining settings:")
   print("\tHCP tasks: {}".format(training_tasks))
   print("\tLearning rate: {}".format(learning_rate))
@@ -81,10 +76,9 @@ def main():
   # how many cognitive states are there in the training data?
   n_states_training = np.sum([hcp_info.n_states_per_task[task] for task in training_tasks])
   
-  # get subject ids from data_path
   subjects = np.sort(np.unique([int(p.split('sub-')[1]) for p in os.listdir(data_path) if p.startswith('sub-')]))
 
-  # assign subjects to training / validation data (2 / 1)
+  # assign subjects to training / validation data (2 / 1 split)
   subjects_training = np.random.choice(subjects, np.int(subjects.size*2/3.), replace=False)
   subjects_validation = np.array([s for s in subjects if s not in subjects_training])
   print('\nRandom subject split: ')
@@ -98,7 +92,7 @@ def main():
     for subject in subjects_training:
       for run in hcp_info.runs:
         filepath = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
-        if os.path.isfile(filepath): # make sure file exists
+        if os.path.isfile(filepath):
           train_files.append(filepath)
   
   # get paths to validation TFR files
@@ -107,10 +101,9 @@ def main():
     for subject in subjects_validation:
       for run in hcp_info.runs:
         filepath = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
-        if os.path.isfile(filepath): # make sure file exists
+        if os.path.isfile(filepath):
           validation_files.append(filepath)
 
-  # make model
   if architecture == '3D':
     deeplight_variant = deeplight.three.model(
       n_states=n_states_training,
@@ -126,7 +119,6 @@ def main():
   else:
     raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
 
-  # fit DeepLight; save models to output_path during training
   fit_history = deeplight_variant.fit(train_files=train_files,
                                       validation_files=validation_files,
                                       n_onehot=20, # there are 20 values in the onehot encoding of the HCP TFR files (one for each of the 20 cognitive states of the HCP data)
@@ -145,5 +137,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # run main
+
     main()

@@ -97,18 +97,13 @@ def parse_func_tfr(example_proto, nx, ny, nz, n_onehot=None, onehot_idx=None, on
                 'state': tf.FixedLenFeature([1], tf.int64),
                 'onehot': tf.FixedLenFeature([n_onehot], tf.int64)}
     parsed_features = tf.parse_single_example(example_proto, features)
-    # set onehot_indices
+
     if onehot_idx is None:
         onehot_idx = np.arange(n_onehot)
-    # preprocess volume    
     volume = tf.cast(tf.reshape(parsed_features["volume"], [1, nx, ny, nz]), tf.float32)
-    # transpose; DeepLight expects [nz, ny, nx, 1]
-    volume = tf.transpose(volume)
-    # remove NANs
+    volume = tf.transpose(volume) # transpose; DeepLight expects [nz, ny, nx, 1]
     volume = tf.where(tf.is_nan(volume), tf.zeros_like(volume), volume)
-    # remove INFs
     volume = tf.where(tf.is_inf(volume), tf.ones_like(volume)*1e4, volume)
-    # subset to onehot-idx
     onehot = tf.cast(tf.gather(parsed_features["onehot"], onehot_idx), tf.int64)
     if only_parse_XY:
         return (volume, onehot)

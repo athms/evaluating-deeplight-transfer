@@ -5,7 +5,6 @@ from modules import Module
 
 class LSTM(Module):
     """LSTM cell."""
-
     def __init__(self,
                  dim=64,
                  input_dim=None,
@@ -34,14 +33,11 @@ class LSTM(Module):
               from beginning-to_end or end-to-beginning. Defaults to False.
           name (str, optional): Name assigned to layer. Defaults to "lstm".
       """
-
       self.name = name
       Module.__init__(self)
 
-      # initialize weights / biases
       with tf.name_scope(self.name):
 
-        # initialize shape variables
         self.input_dim = input_dim  # n features
         self.dim = dim  # n output features
         self.seq_length = sequence_length
@@ -52,7 +48,6 @@ class LSTM(Module):
         self.forget_bias = forget_bias
         self.reverse_input = reverse_input
 
-        # dropout check
         def _dropout_check_false():
             return tf.constant(1.0)
         def _input_dropout_check_true():
@@ -68,7 +63,6 @@ class LSTM(Module):
                                                 _output_dropout_check_true,
                                                 _dropout_check_false)
 
-        # initialze weights
         self.Wxh = tf.get_variable(self.name+'/weights_xh', shape=[4 * self.dim, self.input_dim], initializer=weights_init)
         self.bxh = tf.get_variable(self.name+'/biases_xh', shape=[4 * self.dim], initializer=bias_init)
         self.Whh = tf.get_variable(self.name+'/weights_hh', shape=[4 * self.dim, self.dim], initializer=weights_init)
@@ -81,7 +75,6 @@ class LSTM(Module):
         self.f_idx = tf.range(2*self.dim, 3*self.dim)
         self.o_idx = tf.range(3*self.dim, 4*self.dim)
 
-      # cell state containers
       self._init_cell()
 
 
@@ -106,14 +99,10 @@ class LSTM(Module):
       Returns:
           Tensor: Hidden LSTM state of last sequence step.
       """
-
-      # compute propahation pass
       with tf.variable_scope(self.name, reuse=True):
 
         self._init_cell()
 
-        # set input
-        # make sure input has right dimension
         if len(x.get_shape().as_list()) != 3:
           self.x = tf.reshape(x, [-1, self.seq_length, self.input_dim])
         else:
@@ -124,7 +113,6 @@ class LSTM(Module):
         if self.reverse_input:
           self.x_time_first = tf.reverse(self.x_time_first, [0])
 
-        # iterate over sequence
         for t in range(self.seq_length):
 
           x_t = tf.nn.dropout(tf.gather(self.x_time_first, t), keep_prob=self.input_keep_prob_tensor)
@@ -191,18 +179,15 @@ class LSTM(Module):
 
       self.R = tf.transpose(R)
 
-      # set sample relevances as "output"-relevance for each pass
       if self.reverse_input:
         self.Rh[self.seq_length-1] = tf.gather(self.R, tf.range(self.dim, 2*self.dim))
       else:
         self.Rh[self.seq_length-1] = tf.gather(self.R, tf.range(0, self.dim))
 
-      # iterate over sequence
       for t in reversed(range(self.seq_length)):
-        # index time / sample
+
         x_t = tf.gather(self.x_time_first, t)
 
-        # index gate / state containers
         i_gate = tf.gather(self.gates[t], self.i_idx)
         j_gate = tf.gather(self.gates[t], self.j_idx)
         f_gate = tf.gather(self.gates[t], self.f_idx)
@@ -210,7 +195,6 @@ class LSTM(Module):
         j_gate_pre = tf.gather(self.gates_pre[t], self.j_idx)
         j_gate_pre = tf.gather(self.gates_pre[t], self.j_idx)
 
-        # step
         self.Rc[t] += self.Rh[t]
         self.Rc[t-1] = self.propagation_rule(f_gate * self.c[t-1],
                                               tf.eye((self.dim)),
@@ -236,7 +220,7 @@ class LSTM(Module):
                                               j_gate_pre,
                                               self.Rg[t],
                                               self.dim + self.input_dim)
-      # resort relevances according to sample / sequence-steps
+
       Rout = []
       for sample in range(self.batch_size):
         if self.reverse_input:
@@ -253,7 +237,6 @@ class LSTM(Module):
 
 class LSTM_bidirectional(Module):
     """Bi-directional LSTM cell."""
-
     def __init__(self,
                  dim,
                  input_dim=None,
@@ -282,11 +265,9 @@ class LSTM_bidirectional(Module):
               from beginning-to_end or end-to-beginning. Defaults to False.
           name (str, optional): Name assigned to layer. Defaults to "lstm_bidirectional".
       """
-
       self.name = name
       Module.__init__(self)
 
-      # initialize weights / biases
       with tf.name_scope(self.name):
 
         self.input_dim = input_dim  # n features
@@ -298,7 +279,6 @@ class LSTM_bidirectional(Module):
         self.output_keep_prob = output_keep_prob
         self.forget_bias = forget_bias
 
-        # init fw LSTM cell
         self.fw_cell = LSTM(dim,
                             batch_size=self.batch_size,
                             input_dim=self.input_dim,
@@ -310,7 +290,6 @@ class LSTM_bidirectional(Module):
                             forget_bias=self.forget_bias,
                             name="lstm_fw")
 
-        # init bw LSTM cell
         self.bw_cell = LSTM(dim,
                             batch_size=self.batch_size,
                             input_dim=self.input_dim,

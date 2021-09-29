@@ -30,14 +30,13 @@ def _fit(self,
   shuffle_buffer_size: int = 500,
   n_workers: int = 4):
   """Fit model."""
-  # make datasets
-  # training
+  
   train_dataset = io.make_dataset(
     files=train_files,
     batch_size=batch_size,
-    nx=self.input_shape[0],
+    nx=self.input_shape[2],
     ny=self.input_shape[1],
-    nz=self.input_shape[2],
+    nz=self.input_shape[0],
     shuffle=True,
     only_parse_XY=True,
     repeat=True,
@@ -45,13 +44,13 @@ def _fit(self,
     onehot_idx=onehot_idx,
     shuffle_buffer_size=shuffle_buffer_size,
     n_workers=n_workers)
-  # validation
+  
   val_dataset = io.make_dataset(
     files=validation_files,
     batch_size=batch_size,
-    nx=self.input_shape[0],
+    nx=self.input_shape[2],
     ny=self.input_shape[1],
-    nz=self.input_shape[2],
+    nz=self.input_shape[0],
     shuffle=False,
     only_parse_XY=True,
     repeat=True,
@@ -61,15 +60,12 @@ def _fit(self,
     scope_name='validation',
     n_workers=n_workers)
   
-  # setup callbacks
   callbacks = _make_callbacks(output_path)
   
-  # compile model
   self.model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
   
-  # fit model
   if verbose:
     print('Starting training...')
   history = self.model.fit(

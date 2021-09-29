@@ -45,21 +45,18 @@ def preprocess_subject_data(subject_data, runs, high_pass=None, smoothing_fwhm=N
         state: cognitive state for each volume (ie., TR).
         trs: tr for each volume
     """
-
     func = []
     labels = []
     trs = []
     for run in runs:
-        # load tfMRI data
         func_run = load_img(subject_data[run]['func_mni'])
         mask_run = load_img(subject_data[run]['func_mask_mni'])
         tr_run = subject_data[run]['onset']
 
         trial_type = subject_data[run]['trial_type']
-        cleaned_func = _clean_func(
-            func_run, mask_run, smoothing_fwhm=smoothing_fwhm, high_pass=high_pass, t_r=subject_data['tr'])
+        cleaned_func = _clean_func(func_run, mask_run,
+            smoothing_fwhm=smoothing_fwhm, high_pass=high_pass, t_r=subject_data['tr'])
 
-        # subset tfMRI data to valid volumes
         valid_volume_idx = np.isfinite(trial_type)
         valid_func = index_img(cleaned_func, valid_volume_idx)
         valid_trial_type = trial_type[valid_volume_idx]

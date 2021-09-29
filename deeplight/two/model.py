@@ -17,7 +17,8 @@ class model(object):
     batch_size: int = 32,
     return_logits: bool = True,
     verbose: bool = True,
-    name: str = '2D') -> None:
+    name: str = '2D',
+    input_shape: int = (91, 109, 91, 1)) -> None:
     """A basic implementation of the 2D-DeepLight architecture
     as published in Thomas et al., 2021.
 
@@ -30,10 +31,12 @@ class model(object):
         return_logits (bool, optional): Whether to return logits or softmax. Defaults to True.
         verbose (bool, optional): Comment current program stages? Defaults to True.
         name (str, optional): Name of the model. Defaults to '2D'.
+        input_shape (int, optional): Shape of input in the following order: (nz, ny, nx, 1)
+            Defaults to MNI152NLin6Asym with shape (z: 91, y: 109, x: 91, 1)
     """
     self.architecture = name
     self.pretrained = pretrained
-    self.input_shape = (91,109,91,1) # MNI152NLin6Asym
+    self.input_shape = input_shape # fixed for MNI152NLin6Asym space
     self.n_states = n_states
     self.return_logits = return_logits
     self.batch_size = batch_size
@@ -53,24 +56,23 @@ class model(object):
     self.sess = tf.Session()
 
     with tf.variable_scope('model'):
-      # init model
-      self.model = _init_model(input_shape=self.input_shape,
-          n_classes=self.n_states, batch_size=self.batch_size,
-          conv_keep_probs=self._conv_keep_probs, keep_prob=self._keep_prob,
+      self.model = _init_model(
+          input_shape=self.input_shape,
+          n_classes=self.n_states,
+          batch_size=self.batch_size,
+          conv_keep_probs=self._conv_keep_probs,
+          keep_prob=self._keep_prob,
           return_logits=self.return_logits)
-      self._volume = tf.placeholder(tf.float32, [self.batch_size*91, 109, 91, 1])
+      self._volume = tf.placeholder(tf.float32,
+        [self.batch_size*self.input_shape[0], self.input_shape[1], self.input_shape[2], self.input_shape[3]])
       self._logits = self.model.forward(self._volume)
-      # extract trainable variables
       self._tvars = tf.trainable_variables()
 
-    # init variables
     self.sess.run(tf.global_variables_initializer())
 
-    # path to pre-trained weights
     self._path_pretrained_tvars = os.path.join(os.path.dirname(deeplight.__file__),
       'two', 'pretrained_model', 'model-2D_DeepLight_desc-pretrained_model.npy')
     if self.pretrained:
-      # load pre-trained weights
       self.load_weights(self._path_pretrained_tvars)
 
   def load_weights(self, path, verbose=None):
@@ -103,7 +105,7 @@ class model(object):
     """Decode cognitive states for volume.
 
     Args:
-        volume (Tensor): Input volume
+        volume (Tensor): Input volume with shape (batch-size, nz, ny, nx, 1)
 
     Returns:
         ndarray: Logits (or softmax), n x n_states
@@ -150,9 +152,7 @@ class model(object):
     Returns:
         DataFrame: Training history.
     """
-    # make sure output path exists
     os.makedirs(output_path, exist_ok=True)
-    # run _fit, which returns training history
     return _fit(self,
       train_files=train_files,
       validation_files=validation_files,
@@ -179,7 +179,7 @@ class model(object):
         # subset logits to predicted class
         self._R = tf.where(tf.equal(tf.one_hot(tf.argmax(self._logits, axis=1), depth=self.n_states), 1),
           self._logits, tf.zeros_like(self._logits))
-        # backpropagate relevances through layers
+        # backpropagate relevances
         for layer in self.model.modules[::-1]:
           self._R = self.model.lrp_layerwise(layer, self._R, 'epsilon', 1e-3)
 
@@ -187,7 +187,7 @@ class model(object):
     """Interpret decoding decision for volume.
 
     Args:
-        volume (array): Input volume
+        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
 
     Returns:
         relevances: relevance values for each voxel of volume

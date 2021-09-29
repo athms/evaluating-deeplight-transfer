@@ -83,7 +83,7 @@ def check_subject_data_present(bucket, subject, task, runs):
         tfMRI_key = (prefix+'tfMRI_{}_{}.nii.gz'.format(task, run))
         checks.append(_check_key_exists(tfMRI_key, bucket, prefix))
 
-        # tfMRI mask
+        # brainmask
         tfMRI_mask_key = (prefix + 'brainmask_fs.2.nii.gz')
         checks.append(_check_key_exists(tfMRI_mask_key, bucket, prefix))
 
@@ -138,8 +138,6 @@ def download_subject_data(ACCESS_KEY, SECRET_KEY, subject, task, run, output_pat
         runs: String ID of HCP run (one of ["LR", "RL"])
         output_path: Local path to which data is written.
     """
-
-    # make sure all requiered dirs exist
     path_sub = output_path+'sub-{}/'.format(subject)
     path_anat = path_sub+'anat/'
     path_func = path_sub+'func/'
@@ -147,7 +145,6 @@ def download_subject_data(ACCESS_KEY, SECRET_KEY, subject, task, run, output_pat
     paths.make_sure_path_exists(path_anat)
     paths.make_sure_path_exists(path_func)
 
-    # connect to bucket
     bucket, s3 = connect_to_hcp_bucket(
         ACCESS_KEY=ACCESS_KEY, SECRET_KEY=SECRET_KEY)
 

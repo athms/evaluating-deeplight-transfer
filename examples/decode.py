@@ -11,10 +11,8 @@ import hcprep
 
 def main():
 
-  # set random seed
   np.random.seed(24091)
 
-  # parse arguments
   ap = argparse.ArgumentParser()
   ap.add_argument("--data", required=False, default='../data/',
                   help="path to TFR data files")
@@ -34,8 +32,8 @@ def main():
                   help="path where predictions are saved (default: ../results/predictions/)")
   ap.add_argument("--verbose", required=False, default=1,
                   help="comment current program steps (0: no or 1: yes) (default: 1)")
+  
   args = vars(ap.parse_args())
-  # set variables
   architecture = str(args['architecture'])
   pretrained = bool(int(args['pretrained']))
   task = str(args['task'])
@@ -54,35 +52,29 @@ def main():
   # make sure task specification is valid
   assert task in ['EMOTION', 'LANGUAGE', 'SOCIAL', 'GAMBLING', 'MOTOR', 'RELATIONAL'], 'Invalid task; only pre-training tasks valid (all HCP tasks, except for WM)!'
 
-  # get hcp info
   hcp_info = hcprep.info.basics()
 
-  # define subject out path
   sub_out_path = out_path+'sub-{}/'.format(subject)
-  os.makedirs(sub_out_path, exist_ok=True) # and make sure path exists
+  os.makedirs(sub_out_path, exist_ok=True)
   if verbose:
     print('\nSaving predictions to: {}'.format(sub_out_path))
 
-  # load subject func img & mask
   sub_bold_img = image.load_img(hcprep.paths.path_bids_func_mni(subject, task, run, data_path))
   sub_bold_mask = image.load_img(hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path))
 
-  # get TFR filepath
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
-  # make dataset from tfr_file
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
     batch_size=batch_size,
     repeat=False,
-    n_workers=2)
+    n_workers=2,
+    transpose_xyz=True) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
 
-  # make iterator
   iterator = dataset.make_initializable_iterator()
   iterator_features = iterator.get_next()
 
-  # make model
   if architecture == '3D':
     deeplight_variant = deeplight.three.model(
       batch_size=batch_size,
@@ -98,20 +90,16 @@ def main():
   else:
       raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
 
-  # init session
   sess = tf.Session()
   sess.run(iterator.initializer)
 
   print('\nPredicting for subject {} in run {} of task {}'.format(subject, run, task))
-  i, acc = 1, 0 # batch index, current accuracy
-  predictions = [] # to collect predictions
+  i, acc = 1, 0
+  predictions = [] 
   while True:
     try:
-      # get tr, state_onehot, and volume from dataset
       tr, onehot, volume = sess.run((iterator_features['tr'], iterator_features['onehot'], iterator_features['volume']))
-      # predict 
       pred = deeplight_variant.decode(volume)
-      # collect results
       for ii in range(tr.shape[0]):
           predictions.append(pd.DataFrame({'subject': subject,
                                            'task': task,
@@ -120,7 +108,6 @@ def main():
                                            'true_state': onehot[ii].argmax(),
                                            'pred_state': pred[ii].argmax()},
                                           index=[i]))
-          # compute & print running acc
           acc += (onehot[ii].argmax() == pred[ii].argmax())
           if verbose and (i%10) == 0:
             print('\tBatch: {}; acc: {} %'.format(i, (acc/i)*100))
@@ -129,17 +116,14 @@ def main():
       break
     except ValueError:
       break
-  # make dataframe
   predictions = pd.concat(predictions)
   print('Total decoding accuracy: {} %'.format(np.mean(predictions['true_state']==predictions['pred_state']) * 100))
-  # save predictions
   predictions.to_csv(sub_out_path+'task-{}_sub-{}_run-{}_desc-predictions_{}-DeepLight_pretrained-{}.csv'.format(
     task, subject, run, architecture, pretrained), index=False)
 
 
 if __name__ == '__main__':
 
-  # run main
   main()
 
     

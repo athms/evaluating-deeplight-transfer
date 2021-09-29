@@ -7,7 +7,6 @@ class Dropout(Module):
     '''
     Dropout Layer
     '''
-
     def __init__(self, keep_prob=tf.constant(1.0), noise_shape=None, name='dropout', batch_size=None):
         self.name = name
         Module.__init__(self)
@@ -17,6 +16,7 @@ class Dropout(Module):
         self.batch_size = batch_size
 
     def forward(self, input_tensor):
+        """Forward pass"""
         self.input_tensor = input_tensor
         inp_shape = self.input_tensor.get_shape().as_list()
 

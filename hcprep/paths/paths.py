@@ -73,5 +73,3 @@ def path_bids_tfr(subject, task, run, path):
         path: Path to local BIDS directory.
     """
     return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-tfr.tfrecords".format(subject, task, run))
-    #return path+'sub-{}/func/sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-tfr.nii.gz'.format(
-    #    subject, subject, task, run)

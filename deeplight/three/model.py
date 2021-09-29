@@ -18,7 +18,8 @@ class model(object):
     batch_size: int = 32,
     return_logits: bool = True,
     verbose: bool = True,
-    name: str = '3D'):
+    name: str = '3D',
+    input_shape: int = (91, 109, 91, 1)) -> None:
     """A basic implementation of the 3D-DeepLight architecture
     as published in Thomas et al., 2021.
 
@@ -31,11 +32,12 @@ class model(object):
       return_logits (bool, optional): Whether to return logits (or softmax). Defaults to True.
       verbose (bool, optional): Comment current program stages? Defaults to True.
       name (str, optional): Name of the model. Defaults to '3D'.
+      input_shape (int, optional): Shape of input in the following order: (nz, ny, nx, 1)
+            Defaults to MNI152NLin6Asym with shape (z: 91, y: 109, x: 91, 1)
     """
-    # make model
     self.architecture = name
     self.pretrained = pretrained
-    self.input_shape = (91,109,91,1) # this is fixed for MNI152NLin6Asym
+    self.input_shape = input_shape # this is fixed for MNI152NLin6Asym
     self.n_states = n_states
     self.return_logits = return_logits
     self.batch_size = batch_size
@@ -52,10 +54,8 @@ class model(object):
       batch_size=self.batch_size, return_logits=self.return_logits)
 
     if self.pretrained:
-      # define path to pre-trained weights
       self._path_pretrained_weights = os.path.join(os.path.dirname(deeplight.__file__),
         'three', 'pretrained_model', 'model-3D_DeepLight_desc-pretrained_model.hdf5')
-      # set model weights to pre-trained weights
       self.load_weights(self._path_pretrained_weights)
 
   def load_weights(self, path: str):
@@ -76,7 +76,7 @@ class model(object):
     """Decode cognitive states for volume.
 
     Args:
-        volume (array): Input volume
+        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
 
     Returns:
         ndarray: Logits (or softmax), n x n_states
@@ -120,9 +120,8 @@ class model(object):
     Returns:
         DataFrame: Training history.
     """
-    # make sure output path exists
     os.makedirs(output_path, exist_ok=True)
-    # fit
+
     (history, model) = _fit(self,
       train_files=train_files,
       validation_files=validation_files,
@@ -137,16 +136,19 @@ class model(object):
       verbose=self.verbose,
       shuffle_buffer_size=shuffle_buffer_size,
       n_workers=n_workers)
-    # update model
+
     self.model = model
+
     return history
 
   def setup_lrp(self):
     """Setup LRP for 3D-DeepLight."""
     if self.return_logits is False:
       warnings.warning('"'"return_logits"'" should be set to "'"True"'" when computing LRP.')
+    
     if self.verbose:
       print("\tSetting up LRP analyzer..")
+    
     # rebuild model in keras (required for iNNvestigate)
     analyzer_model = _init_model(
       keras=keras,
@@ -154,10 +156,10 @@ class model(object):
       n_classes=self.n_states,
       batch_size=self.batch_size,
       return_logits=self.return_logits)
-    # set weights of analyzer_model to those of self.model
+    
     for model_layer, stored_model_layer in zip(analyzer_model.layers, self.model.layers):
       model_layer.set_weights(stored_model_layer.get_weights())
-    # define relevence computation
+    
     self._analyzer = innvestigate.analyzer.relevance_based.relevance_analyzer.LRPSequentialPresetBFlat(
       model=analyzer_model,
       neuron_selection_mode="index",
@@ -167,7 +169,7 @@ class model(object):
     """Interpret decoding decision for volume.
 
     Args:
-        volume (array): Input volume
+        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
 
     Returns:
         relevances: relevance values for each voxel of volume
