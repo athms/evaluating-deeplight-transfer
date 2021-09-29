@@ -88,7 +88,7 @@ Both deeplight architectures implement basic `fit`, `decode`, and `interpret` fu
 
 For further methdological details regarding the two DeepLight architectures, see the upcoming preprint.
 
-**Note** that both DeepLight architectures currently operate in transposed MNI-space and therefore expect as input volumes of shape (z, y, x) and not (x, y, z). We are working on handling all data transposes internally and will update the code soon.
+**Note** that both DeepLight architectures currently operate in transposed MNI-space and therefore expect as input volumes of shape (z, y, x) and not (x, y, z). We are working on handling all data transposes internally and will update the code soon (see branch data-transpose).
 
 **Also note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to a high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
 
