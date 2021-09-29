@@ -5,6 +5,7 @@ import warnings
 import tensorflow as tf
 import keras
 import innvestigate
+from einops import rearrange
 from ._architecture import _init_model
 from ._fit import _fit
 import deeplight
@@ -32,8 +33,8 @@ class model(object):
       return_logits (bool, optional): Whether to return logits (or softmax). Defaults to True.
       verbose (bool, optional): Comment current program stages? Defaults to True.
       name (str, optional): Name of the model. Defaults to '3D'.
-      input_shape (int, optional): Shape of input in the following order: (nz, ny, nx, 1)
-            Defaults to MNI152NLin6Asym with shape (z: 91, y: 109, x: 91, 1)
+      input_shape (int, optional): Shape of input as (x, y, z)
+            Defaults to MNI152NLin6Asym with shape (x: 91, y: 109, z: 91)
     """
     self.architecture = name
     self.pretrained = pretrained
@@ -70,17 +71,27 @@ class model(object):
   def save_weights(self, path: str):
     """Save model weights to path."""
     assert path.endswith('.hdf5'), 'Model needs to be stored in .hdf5 format, but {} was given!'.format(path)
-    self.model.save(path)   
+    self.model.save(path)
+
+  def _tranpose_volumes(self, volume):
+    """tranpose (x, y, z) dimensions"""
+    return rearrange(volume, 'b x y z c  -> b z y x c')
+
+  def _add_channel_dim(self, volume):
+    """add channel dimension to volume"""
+    return np.expand_dims(volume, -1)
 
   def decode(self, volume):
     """Decode cognitive states for volume.
 
     Args:
-        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
+        volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
         ndarray: Logits (or softmax), n x n_states
     """
+    volume = self._add_channel_dim(volume)
+    volume = self._tranpose_volumes(volume)
     return self.model.predict(volume)
 
   def fit(self,
@@ -169,10 +180,13 @@ class model(object):
     """Interpret decoding decision for volume.
 
     Args:
-        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
+        volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
         relevances: relevance values for each voxel of volume
     """
     pred_batch = self.decode(volume).argmax(axis=1)
-    return self._analyzer.analyze(volume, neuron_selection=pred_batch)
+    volume = self._add_channel_dim(volume)
+    volume = self._tranpose_volumes(volume)
+    R = self._analyzer.analyze(volume, neuron_selection=pred_batch)
+    return self._tranpose_volumes(R)[...,0] # removing channel dim

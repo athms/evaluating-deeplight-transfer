@@ -6,17 +6,17 @@ from modules import Module
 class LSTM(Module):
     """LSTM cell."""
     def __init__(self,
-                 dim=64,
-                 input_dim=None,
-                 batch_size=32,
-                 weights_init=tf.truncated_normal_initializer(stddev=0.01),
-                 bias_init=tf.constant_initializer(0.0),
-                 sequence_length=None,
-                 input_keep_prob=1.0,
-                 output_keep_prob=1.0,
-                 forget_bias=1.0,
-                 reverse_input=False,
-                 name="lstm"):
+      dim=64,
+      input_dim=None,
+      batch_size=32,
+      weights_init=tf.truncated_normal_initializer(stddev=0.01),
+      bias_init=tf.constant_initializer(0.0),
+      sequence_length=None,
+      input_keep_prob=1.0,
+      output_keep_prob=1.0,
+      forget_bias=1.0,
+      reverse_input=False,
+      name="lstm"):
       """Basic LSTM cell implementation.
 
       Args:
@@ -142,7 +142,14 @@ class LSTM(Module):
       return self._lrp(R)
 
 
-    def __epsilon_lrp(self, hin, weights, biases, hout, Rout, n_bias_units, bias_factor=0):
+    def __epsilon_lrp(self,
+      hin,
+      weights,
+      biases,
+      hout,
+      Rout,
+      n_bias_units,
+      bias_factor=0):
       """Epsilon LRP implementation"""
       sign_out = tf.where(tf.greater_equal(hout, 0.),
                           tf.ones_like(hout, dtype=tf.float32),
@@ -238,16 +245,16 @@ class LSTM(Module):
 class LSTM_bidirectional(Module):
     """Bi-directional LSTM cell."""
     def __init__(self,
-                 dim,
-                 input_dim=None,
-                 batch_size=None,
-                 weights_init=tf.truncated_normal_initializer(stddev=0.01),
-                 bias_init=tf.constant_initializer(0.0),
-                 sequence_length=None,
-                 input_keep_prob=1.0,
-                 output_keep_prob=1.0,
-                 forget_bias=1.0,
-                 name="lstm_bidirectional"):
+      dim,
+      input_dim=None,
+      batch_size=None,
+      weights_init=tf.truncated_normal_initializer(stddev=0.01),
+      bias_init=tf.constant_initializer(0.0),
+      sequence_length=None,
+      input_keep_prob=1.0,
+      output_keep_prob=1.0,
+      forget_bias=1.0,
+      name="lstm_bidirectional"):
       """Basic bi-directional LSTM cell implementation;
       combining two LSTM cells.
 
