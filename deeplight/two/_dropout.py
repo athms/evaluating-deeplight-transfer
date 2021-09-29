@@ -7,7 +7,11 @@ class Dropout(Module):
     '''
     Dropout Layer
     '''
-    def __init__(self, keep_prob=tf.constant(1.0), noise_shape=None, name='dropout', batch_size=None):
+    def __init__(self,
+        keep_prob=tf.constant(1.0),
+        noise_shape=None,
+        name='dropout',
+        batch_size=None):
         self.name = name
         Module.__init__(self)
 

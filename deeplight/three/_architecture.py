@@ -2,7 +2,12 @@
 import numpy as np
 
 
-def _init_model(keras, input_shape: int, n_classes: int, batch_size: int, return_logits: bool = True):
+def _init_model(
+  keras,
+  input_shape: int,
+  n_classes: int,
+  batch_size: int,
+  return_logits: bool = True):
   """Setup 3D-DeepLight architecture,
   as specified in Thomas et al., 2021"""
   

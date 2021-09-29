@@ -10,7 +10,6 @@ def _make_callbacks(output_path: str):
   filepath = output_path+"epoch-{epoch:03d}.h5"
   checkpoint = tf.keras.callbacks.ModelCheckpoint(
   filepath, monitor='val_acc', verbose=1, save_best_only=False, period=1)
-  # csv
   csv_logger = tf.keras.callbacks.CSVLogger(output_path+'history.csv', separator=",", append=True)
   return [checkpoint, csv_logger]
 
@@ -34,11 +33,13 @@ def _fit(self,
   train_dataset = io.make_dataset(
     files=train_files,
     batch_size=batch_size,
-    nx=self.input_shape[2],
+    nx=self.input_shape[0],
     ny=self.input_shape[1],
-    nz=self.input_shape[0],
+    nz=self.input_shape[2],
     shuffle=True,
     only_parse_XY=True,
+    transpose_xyz=True,
+    add_channel_dim=True,
     repeat=True,
     n_onehot=n_onehot,
     onehot_idx=onehot_idx,
@@ -48,11 +49,13 @@ def _fit(self,
   val_dataset = io.make_dataset(
     files=validation_files,
     batch_size=batch_size,
-    nx=self.input_shape[2],
+    nx=self.input_shape[0],
     ny=self.input_shape[1],
-    nz=self.input_shape[0],
+    nz=self.input_shape[2],
     shuffle=False,
     only_parse_XY=True,
+    transpose_xyz=True,
+    add_channel_dim=True,
     repeat=True,
     n_onehot=n_onehot,
     onehot_idx=onehot_idx,

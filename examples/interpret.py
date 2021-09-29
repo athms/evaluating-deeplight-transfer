@@ -19,7 +19,9 @@ def main():
   ap.add_argument("--pretrained", required=False, default=1,
                   help="use pre-trained model? (1: True or 0_ False) (default: 1)")
   ap.add_argument("--task", required=False, default='MOTOR',
-                  help="data of which task to interpret (EMOTION, GAMBLING, LANGUAGE, SOCIAL, MOTOR, RELATIONAL, WM)? (default: MOTOR)")
+                  help="data of which task to interpret"\
+                    "(EMOTION, GAMBLING, LANGUAGE, SOCIAL,"\
+                    "MOTOR, RELATIONAL, WM)? (default: MOTOR)")
   ap.add_argument("--subject", required=False, default=100307, 
                   help="data of which subject to interpret? (default: 100307)")
   ap.add_argument("--run", required=False, default='LR', 
@@ -29,7 +31,8 @@ def main():
   ap.add_argument("--out", required=False,
                   help="path where DeepLight maps are saved")
   ap.add_argument("--verbose", required=False, default=1,
-                  help="comment current program steps (0: no or 1: yes) (default: 1)")
+                  help="comment current program steps"\
+                    "(0: no or 1: yes) (default: 1)")
   
   args = vars(ap.parse_args())
   architecture = str(args['architecture'])
@@ -53,8 +56,8 @@ def main():
   if verbose:
     print('\nSaving results to: {}'.format(sub_out_path))
 
-  sub_bold_img = image.load_img(hcprep.paths.path_bids_func_mni(subject, task, run, data_path))
-  sub_bold_mask = image.load_img(hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path))
+  sub_bold_img = image.load_img( hcprep.paths.path_bids_func_mni(subject, task, run, data_path) )
+  sub_bold_mask = image.load_img( hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path) )
 
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
@@ -63,8 +66,7 @@ def main():
     n_onehot=20, # there are 20 cognitive states in the HCP data (so 20 total onehot entries)
     batch_size=1, # to save memory, we process 1 sample at a time!
     repeat=False,
-    n_workers=2,
-    transpose_xyz=True) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
+    n_workers=2) # deeplight expects input in shape (nz, ny, nx, 1) instead of (nx, ny, nz, 1)
   
   iterator = dataset.make_initializable_iterator()
   iterator_features = iterator.get_next()
@@ -82,7 +84,8 @@ def main():
       pretrained=pretrained,
       verbose=verbose)
   else:
-      raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
+      raise ValueError('Invalid value for DeepLight architecture."\
+        "Must be 2D or 3D.')
 
   deeplight_variant.setup_lrp()
 
@@ -90,7 +93,8 @@ def main():
   sess.run(iterator.initializer)
 
   if verbose:
-    print('\nInterpreting predictions for task: {}, subject: {}, run: {}'.format(task, subject, run))
+    print('\nInterpreting predictions for task:"\
+      "{}, subject: {}, run: {}'.format(task, subject, run))
   states = []
   relevances = []
   trs = []
@@ -122,9 +126,7 @@ def main():
   
   trs = np.concatenate(trs)
   states = np.concatenate(states)
-  relevances = np.concatenate([np.expand_dims(r, 0) for r in relevances], axis=0)
-  # we transpose relevances, as DeepLight outputs relevances in shape (nz, ny, nx, 1)
-  relevances = relevances.T[0]
+  relevances = np.concatenate([np.expand_dims(r, -1) for r in relevances], axis=-1)
 
   # sort relevances / states by their TR
   tr_idx = np.argsort(trs)
@@ -164,7 +166,11 @@ def main():
       plt.clf()
       
       # axial slices
-      plotting.plot_stat_map(mean_state_relevance_img, display_mode='z', cut_coords=30, cmap=plt.cm.seismic, threshold=threshold)
+      plotting.plot_stat_map(mean_state_relevance_img,
+                             display_mode='z',
+                             cut_coords=30,
+                             cmap=plt.cm.seismic,
+                             threshold=threshold)
       plt.savefig(sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_axial_slices.png'.format(
         subject, task, run, state), dpi=200)
       plt.clf()

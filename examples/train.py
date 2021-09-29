@@ -18,7 +18,9 @@ def main():
   ap.add_argument("--pretrained", required=False, default=1,
                   help="use pre-trained model? (1: True or 0: False) (default: 1)")
   ap.add_argument("--training-tasks", required=False, default=['WM'],
-                  nargs="+",  help="in which HCP tasks to train (EMOTION, GAMBLING, SOCIAL, LANGUAGE, MOTOR, RELATIONAL, LANGUAGE, WM)? (default: ['WM'])")
+                  nargs="+",  help="in which HCP tasks to train"\
+                    "(EMOTION, GAMBLING, SOCIAL, LANGUAGE, MOTOR,"\
+                      "RELATIONAL, LANGUAGE, WM)? (default: ['WM'])")
   ap.add_argument("--learning-rate", required=False, default=1e-3,
                   help="learning rate for gradient descent with ADAM (default: 1e-3)")
   ap.add_argument("--batch-size", required=False, default=32,
@@ -34,7 +36,8 @@ def main():
   ap.add_argument("--out", required=False, default=None,
                   help="path where epoch models are saved during training")
   ap.add_argument("--verbose", required=False, default=1,
-                  help="comment training with prints in terminal (0: no or 1: yes) (default: 1)")
+                  help="comment training with prints in terminal"\
+                    "(0: no or 1: yes) (default: 1)")
   
   args = ap.parse_args()
   architecture = str(args.architecture)
@@ -76,15 +79,18 @@ def main():
   # how many cognitive states are there in the training data?
   n_states_training = np.sum([hcp_info.n_states_per_task[task] for task in training_tasks])
   
-  subjects = np.sort(np.unique([int(p.split('sub-')[1]) for p in os.listdir(data_path) if p.startswith('sub-')]))
+  subjects = np.sort(np.unique([ int(p.split('sub-')[1])
+    for p in os.listdir(data_path) if p.startswith('sub-') ]))
 
   # assign subjects to training / validation data (2 / 1 split)
   subjects_training = np.random.choice(subjects, np.int(subjects.size*2/3.), replace=False)
   subjects_validation = np.array([s for s in subjects if s not in subjects_training])
   print('\nRandom subject split: ')
-  print('\t{} training subjects, {} validation subjects'.format(len(subjects_training), len(subjects_validation)))
+  print('\t{} training subjects, {} validation subjects'.format(
+    len(subjects_training), len(subjects_validation)))
   print('\tSaving subject assignment to: {}'.format(out_path+'subject_split.npy'))
-  np.save(out_path+'subject_split.npy', {'training': subjects_training, 'validation': subjects_validation})
+  np.save(out_path+'subject_split.npy',
+    {'training': subjects_training, 'validation': subjects_validation})
 
   # get paths to training TFR files
   train_files = []

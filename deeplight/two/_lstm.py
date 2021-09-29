@@ -6,28 +6,32 @@ from modules import Module
 class LSTM(Module):
     """LSTM cell."""
     def __init__(self,
-                 dim=64,
-                 input_dim=None,
-                 batch_size=32,
-                 weights_init=tf.truncated_normal_initializer(stddev=0.01),
-                 bias_init=tf.constant_initializer(0.0),
-                 sequence_length=None,
-                 input_keep_prob=1.0,
-                 output_keep_prob=1.0,
-                 forget_bias=1.0,
-                 reverse_input=False,
-                 name="lstm"):
+      dim=64,
+      input_dim=None,
+      batch_size=32,
+      weights_init=tf.truncated_normal_initializer(stddev=0.01),
+      bias_init=tf.constant_initializer(0.0),
+      sequence_length=None,
+      input_keep_prob=1.0,
+      output_keep_prob=1.0,
+      forget_bias=1.0,
+      reverse_input=False,
+      name="lstm"):
       """Basic LSTM cell implementation.
 
       Args:
           dim (int): Dim of hidden embedding.
           input_dim (int, optional): Size of input.
           batch_size (int, optional): Batch size. Defaults to 32.
-          weights_init (weight initializer, optional): initializer for weights. Defaults to tf.truncated_normal_initializer(stddev=0.01).
-          bias_init (weight initializer, optional): initializer for biases. Defaults to tf.constant_initializer(0.0).
+          weights_init (weight initializer, optional): initializer for weights.
+            Defaults to tf.truncated_normal_initializer(stddev=0.01).
+          bias_init (weight initializer, optional): initializer for biases.
+            Defaults to tf.constant_initializer(0.0).
           sequence_length (int, optional): Length of sequence. Defaults to None.
-          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input . Defaults to 1.0.
-          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output. Defaults to 1.0.
+          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input.
+            Defaults to 1.0.
+          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output.
+            Defaults to 1.0.
           forget_bias (float, optional): Bias of forget gate. Defaults to 1.0.
           reverse_input (bool, optional): Whether LSTM iterates through sequence 
               from beginning-to_end or end-to-beginning. Defaults to False.
@@ -63,10 +67,14 @@ class LSTM(Module):
                                                 _output_dropout_check_true,
                                                 _dropout_check_false)
 
-        self.Wxh = tf.get_variable(self.name+'/weights_xh', shape=[4 * self.dim, self.input_dim], initializer=weights_init)
-        self.bxh = tf.get_variable(self.name+'/biases_xh', shape=[4 * self.dim], initializer=bias_init)
-        self.Whh = tf.get_variable(self.name+'/weights_hh', shape=[4 * self.dim, self.dim], initializer=weights_init)
-        self.bhh = tf.get_variable(self.name+'/biases_hh', shape=[4 * self.dim], initializer=bias_init)
+        self.Wxh = tf.get_variable(self.name+'/weights_xh',
+          shape=[4 * self.dim, self.input_dim], initializer=weights_init)
+        self.bxh = tf.get_variable(self.name+'/biases_xh',
+          shape=[4 * self.dim], initializer=bias_init)
+        self.Whh = tf.get_variable(self.name+'/weights_hh',
+          shape=[4 * self.dim, self.dim], initializer=weights_init)
+        self.bhh = tf.get_variable(self.name+'/biases_hh',
+          shape=[4 * self.dim], initializer=bias_init)
         self.W = tf.concat([self.Wxh, self.Whh], axis=1)
 
         # i, f, o gate weight indices
@@ -108,8 +116,7 @@ class LSTM(Module):
         else:
           self.x = x
 
-        self.x_time_first = tf.transpose(
-          tf.transpose(self.x, [1, 0, 2]), [0, 2, 1])  # sequence length, input dim, batch size
+        self.x_time_first = tf.transpose(tf.transpose(self.x, [1, 0, 2]), [0, 2, 1])
         if self.reverse_input:
           self.x_time_first = tf.reverse(self.x_time_first, [0])
 
@@ -142,7 +149,14 @@ class LSTM(Module):
       return self._lrp(R)
 
 
-    def __epsilon_lrp(self, hin, weights, biases, hout, Rout, n_bias_units, bias_factor=0):
+    def __epsilon_lrp(self,
+      hin,
+      weights,
+      biases,
+      hout,
+      Rout,
+      n_bias_units,
+      bias_factor=0):
       """Epsilon LRP implementation"""
       sign_out = tf.where(tf.greater_equal(hout, 0.),
                           tf.ones_like(hout, dtype=tf.float32),
@@ -238,16 +252,16 @@ class LSTM(Module):
 class LSTM_bidirectional(Module):
     """Bi-directional LSTM cell."""
     def __init__(self,
-                 dim,
-                 input_dim=None,
-                 batch_size=None,
-                 weights_init=tf.truncated_normal_initializer(stddev=0.01),
-                 bias_init=tf.constant_initializer(0.0),
-                 sequence_length=None,
-                 input_keep_prob=1.0,
-                 output_keep_prob=1.0,
-                 forget_bias=1.0,
-                 name="lstm_bidirectional"):
+      dim,
+      input_dim=None,
+      batch_size=None,
+      weights_init=tf.truncated_normal_initializer(stddev=0.01),
+      bias_init=tf.constant_initializer(0.0),
+      sequence_length=None,
+      input_keep_prob=1.0,
+      output_keep_prob=1.0,
+      forget_bias=1.0,
+      name="lstm_bidirectional"):
       """Basic bi-directional LSTM cell implementation;
       combining two LSTM cells.
 
@@ -255,11 +269,15 @@ class LSTM_bidirectional(Module):
           dim (int): Dim of hidden embedding of each LSTM cell.
           input_dim (int, optional): Size of input.
           batch_size (int, optional): Batch size. Defaults to 32.
-          weights_init (weight initializer, optional): initializer for weights. Defaults to tf.truncated_normal_initializer(stddev=0.01).
-          bias_init (weight initializer, optional): initializer for biases. Defaults to tf.constant_initializer(0.0).
+          weights_init (weight initializer, optional): initializer for weights.
+            Defaults to tf.truncated_normal_initializer(stddev=0.01).
+          bias_init (weight initializer, optional): initializer for biases.
+            Defaults to tf.constant_initializer(0.0).
           sequence_length (int, optional): Length of sequence. Defaults to None.
-          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input . Defaults to 1.0.
-          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output. Defaults to 1.0.
+          input_keep_prob (float, optional): keep_prob for dropout applied to LSTM input.
+            Defaults to 1.0.
+          output_keep_prob (float, optional): keep_prob for dropout applied to LSTM output.
+            Defaults to 1.0.
           forget_bias (float, optional): Bias of forget gate. Defaults to 1.0.
           reverse_input (bool, optional): Whether LSTM iterates through sequence 
               from beginning-to_end or end-to-beginning. Defaults to False.
@@ -310,7 +328,8 @@ class LSTM_bidirectional(Module):
           x (Tensor): Input tensor
 
       Returns:
-          Tensor: Concatenated hidden state of both LSTM units for last sequence step.
+          Tensor: Concatenated hidden state of both LSTM
+            units for last sequence step.
       """
       with tf.variable_scope(self.name, reuse=True):
         h_fw = self.fw_cell.forward(x)

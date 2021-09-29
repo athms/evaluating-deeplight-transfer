@@ -18,7 +18,7 @@ class model(object):
     return_logits: bool = True,
     verbose: bool = True,
     name: str = '2D',
-    input_shape: int = (91, 109, 91, 1)) -> None:
+    input_shape: int = (91, 109, 91)) -> None:
     """A basic implementation of the 2D-DeepLight architecture
     as published in Thomas et al., 2021.
 
@@ -31,8 +31,8 @@ class model(object):
         return_logits (bool, optional): Whether to return logits or softmax. Defaults to True.
         verbose (bool, optional): Comment current program stages? Defaults to True.
         name (str, optional): Name of the model. Defaults to '2D'.
-        input_shape (int, optional): Shape of input in the following order: (nz, ny, nx, 1)
-            Defaults to MNI152NLin6Asym with shape (z: 91, y: 109, x: 91, 1)
+        input_shape (int, optional): Shape of input as (x, y, z)
+            Defaults to MNI152NLin6Asym with shape (x: 91, y: 109, z: 91)
     """
     self.architecture = name
     self.pretrained = pretrained
@@ -64,7 +64,7 @@ class model(object):
           keep_prob=self._keep_prob,
           return_logits=self.return_logits)
       self._volume = tf.placeholder(tf.float32,
-        [self.batch_size*self.input_shape[0], self.input_shape[1], self.input_shape[2], self.input_shape[3]])
+        [self.batch_size*self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
       self._logits = self.model.forward(self._volume)
       self._tvars = tf.trainable_variables()
 
@@ -95,23 +95,32 @@ class model(object):
 
   def _stack_volumes(self, volume):
     """merge batch and z-axis"""
-    return rearrange(volume, 'b z y x c -> (b z) y x c', z=self.input_shape[0])
+    return rearrange(volume, 'b z y x c -> (b z) y x c', z=self.input_shape[2])
   
   def _unstack_volumes(self, volume):
     """unmerge batch and z-axis"""
-    return rearrange(volume, '(b z) y x c -> b z y x c', z=self.input_shape[0])
+    return rearrange(volume, '(b z) y x c -> b z y x c', z=self.input_shape[2])
+
+  def _tranpose_volumes(self, volume):
+    """tranpose (x, y, z) dimensions"""
+    return rearrange(volume, 'b x y z c  -> b z y x c')
+
+  def _add_channel_dim(self, volume):
+    """add channel dimension to volume"""
+    return np.expand_dims(volume, -1)
 
   def decode(self, volume):
     """Decode cognitive states for volume.
 
     Args:
-        volume (Tensor): Input volume with shape (batch-size, nz, ny, nx, 1)
+        volume (Tensor): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
         ndarray: Logits (or softmax), n x n_states
     """
-    if volume.ndim > 4:
-        volume = self._stack_volumes(volume)
+    volume = self._add_channel_dim(volume)
+    volume = self._tranpose_volumes(volume)
+    volume = self._stack_volumes(volume)
     return self.sess.run(self._logits,
         feed_dict={self._volume: volume, self._keep_prob: 1, self._conv_keep_probs: np.ones(3)})
 
@@ -187,19 +196,16 @@ class model(object):
     """Interpret decoding decision for volume.
 
     Args:
-        volume (array): Input volume with shape (batch-size, nz, ny, nx, 1)
+        volume (array): Input volume with shape (batch-size, nx, ny, nz)
 
     Returns:
         relevances: relevance values for each voxel of volume
     """
     if self._R is None:
       raise NotImplementedError('LRP is not initialized. Please call .setup_lrp() first.')
-    if volume.ndim > 4:
-      volume = self._stack_volumes(volume)
-      stacked = True
-    else:
-      stacked = False
+    volume = self._add_channel_dim(volume)
+    volume = self._tranpose_volumes(volume)
+    volume = self._stack_volumes(volume)
     R = self.sess.run(self._R, feed_dict={self._volume: volume, self._keep_prob: 1, self._conv_keep_probs: np.ones(3)})
-    if stacked:
-      R = self._unstack_volumes(R)
-    return R
+    R = self._unstack_volumes(R)
+    return self._tranpose_volumes(R)[...,0] # removing channel dim

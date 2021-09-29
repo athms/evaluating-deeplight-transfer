@@ -30,7 +30,8 @@ def main():
         if not np.all([os.path.isfile(hcprep.paths.path_bids_func_mni(subject, task, run, path)),
                        os.path.isfile(hcprep.paths.path_bids_func_mask_mni(subject, task, run, path)),
                        os.path.isfile(hcprep.paths.path_bids_EV(subject, task, run, path))]):
-          print('Skipping subejct {} task {} run {}, because BIDS data not fully present.'.format(subject, task, run))
+          print('Skipping subejct {} task {} run {},"\
+            "because BIDS data not fully present.'.format(subject, task, run))
         else:
           subject_data = hcprep.data.load_subject_data(task, subject, [run], path, hcp_info.t_r)
           

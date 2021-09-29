@@ -7,29 +7,31 @@ from deeplight.data import io
 
 
 def _fit(self,
-        train_files: str,
-        validation_files: str,
-        n_onehot: int,
-        onehot_idx: int,
-        learning_rate: float,
-        batch_size: int,
-        epochs: int,
-        training_steps: int,
-        validation_steps: int,
-        output_path: str,
-        verbose: bool = True,
-        shuffle_buffer_size: int = 500,
-        n_workers: int = 4):
+  train_files: str,
+  validation_files: str,
+  n_onehot: int,
+  onehot_idx: int,
+  learning_rate: float,
+  batch_size: int,
+  epochs: int,
+  training_steps: int,
+  validation_steps: int,
+  output_path: str,
+  verbose: bool = True,
+  shuffle_buffer_size: int = 500,
+  n_workers: int = 4):
   """Fit model."""
   files = tf.placeholder(tf.string, shape=[None])
   dataset = io.make_dataset(
     files=files,
     batch_size=batch_size,
-    nx=self.input_shape[2],
+    nx=self.input_shape[0],
     ny=self.input_shape[1],
-    nz=self.input_shape[0],
+    nz=self.input_shape[2],
     shuffle=True,
     only_parse_XY=True,
+    transpose_xyz=True,
+    add_channel_dim=True,
     n_onehot=n_onehot,
     onehot_idx=onehot_idx,
     shuffle_buffer_size=shuffle_buffer_size,
@@ -37,8 +39,8 @@ def _fit(self,
 
   iterator = dataset.make_initializable_iterator()
   volume, onehot = iterator.get_next()
-  # stack volumes by merging (batch size x nz)
-  volume = tf.reshape(volume, [batch_size*self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+  # TODO: avoid hardcoding reshape
+  volume = tf.reshape(volume, [self.batch_size*self.input_shape[2], self.input_shape[1], self.input_shape[0], 1])
 
   with tf.variable_scope('model', reuse=tf.AUTO_REUSE): 
     logits = self.model.forward(volume)
