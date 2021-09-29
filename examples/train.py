@@ -60,7 +60,7 @@ def main():
   hcp_info = hcprep.info.basics()
 
   # check if training tasks correctly specified
-  training_tasks = np.unique(training_tasks) # make sure no repetitions
+  training_tasks = np.unique(training_tasks)
   for task in training_tasks:
     if task not in hcp_info.tasks:
       raise ValueError('{} not in {}'.format(task, hcp_info.tasks))
