@@ -16,7 +16,7 @@ def main():
                   help="AWS S3 secret key")
   ap.add_argument("--path", required=False, default='../data/',
                   help="path to store data (default: ../data/)")
-  ap.add_argument("--n", required=False, default=3,
+  ap.add_argument("-n", required=False, default=3,
                   help="number of subjects to download per HCP task (1-500) (default: 3)")
   
   args = vars(ap.parse_args())
