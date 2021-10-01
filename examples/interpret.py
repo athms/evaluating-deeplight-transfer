@@ -14,25 +14,56 @@ def main():
   np.random.seed(24091)
 
   ap = argparse.ArgumentParser()
-  ap.add_argument("--architecture", required=False, default='3D',
-                  help="DeepLight architecture (2D or 3D) (default: 3D)")
-  ap.add_argument("--pretrained", required=False, default=1,
-                  help="use pre-trained model? (1: True or 0_ False) (default: 1)")
-  ap.add_argument("--task", required=False, default='MOTOR',
-                  help="data of which task to interpret"\
-                    "(EMOTION, GAMBLING, LANGUAGE, SOCIAL,"\
-                    "MOTOR, RELATIONAL, WM)? (default: MOTOR)")
-  ap.add_argument("--subject", required=False, default=100307, 
-                  help="data of which subject to interpret? (default: 100307)")
-  ap.add_argument("--run", required=False, default='LR', 
-                  help="data of which run to interpret (LR or RL)? (default: LR)")
-  ap.add_argument("--data", required=False, default='../data/',
-                  help="path to TFR data files")
-  ap.add_argument("--out", required=False,
-                  help="path where DeepLight maps are saved")
-  ap.add_argument("--verbose", required=False, default=1,
-                  help="comment current program steps"\
-                    "(0: no or 1: yes) (default: 1)")
+  ap.add_argument(
+    "--architecture",
+    required=False,
+    default='3D',
+    help="DeepLight architecture (2D or 3D) (default: 3D)"
+  )
+  ap.add_argument(
+    "--pretrained",
+    required=False,
+    default=1,
+    help="use pre-trained model? (1: True or 0_ False) (default: 1)"
+  )
+  ap.add_argument(
+    "--task",
+    required=False,
+    default='MOTOR',
+    help="data of which task to interpret"\
+         "(EMOTION, GAMBLING, LANGUAGE, SOCIAL,"\
+         "MOTOR, RELATIONAL, WM)? (default: MOTOR)"
+  )
+  ap.add_argument(
+    "--subject",
+    required=False,
+    default=100307, 
+    help="data of which subject to interpret? (default: 100307)"
+  )
+  ap.add_argument(
+    "--run",
+    required=False,
+    default='LR', 
+    help="data of which run to interpret (LR or RL)? (default: LR)"
+  )
+  ap.add_argument(
+    "--data",
+    required=False,
+    default='../data/',
+    help="path to TFR data files"
+  )
+  ap.add_argument(
+    "--out",
+    required=False,
+    help="path where DeepLight maps are saved"
+  )
+  ap.add_argument(
+    "--verbose",
+    required=False,
+    default=1,
+    help="comment current program steps"\
+      "(0: no or 1: yes) (default: 1)"
+  )
   
   args = ap.parse_args()
   architecture = str(args.architecture)
@@ -56,8 +87,12 @@ def main():
   if verbose:
     print('\nSaving results to: {}'.format(sub_out_path))
 
-  sub_bold_img = image.load_img( hcprep.paths.path_bids_func_mni(subject, task, run, data_path) )
-  sub_bold_mask = image.load_img( hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path) )
+  sub_bold_img = image.load_img(
+    hcprep.paths.path_bids_func_mni(subject, task, run, data_path)
+  )
+  sub_bold_mask = image.load_img(
+    hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path)
+  )
 
   tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
 
@@ -69,7 +104,8 @@ def main():
     onehot_idx=np.arange(16), 
     batch_size=1, # to save memory, we process 1 sample at a time!
     repeat=False,
-    n_workers=2)
+    n_workers=2
+  )
   
   iterator = dataset.make_initializable_iterator()
   iterator_features = iterator.get_next()
@@ -79,13 +115,15 @@ def main():
       batch_size=1,
       n_states=16, # pre-trained DeepLight has 16 output states
       pretrained=pretrained,
-      verbose=verbose)
+      verbose=verbose
+    )
   elif architecture == '2D':
     deeplight_variant = deeplight.two.model(
       batch_size=1,
       n_states=16, # pre-trained DeepLight has 16 output states
       pretrained=pretrained,
-      verbose=verbose)
+      verbose=verbose
+    )
   else:
       raise ValueError('Invalid value for DeepLight architecture."\
         "Must be 2D or 3D.')
@@ -130,7 +168,10 @@ def main():
   
   trs = np.concatenate(trs)
   states = np.concatenate(states)
-  relevances = np.concatenate([np.expand_dims(r, -1) for r in relevances], axis=-1)
+  relevances = np.concatenate(
+    [np.expand_dims(r, -1) for r in relevances],
+    axis=-1
+  )
 
   # sort relevances / states by their TR
   tr_idx = np.argsort(trs)
@@ -155,28 +196,37 @@ def main():
           subject, task, run, state))
       
       # 95 percentile threshold for plotting
-      threshold = np.percentile(masking.apply_mask(mean_state_relevance_img, sub_bold_mask), 95)
+      threshold = np.percentile(
+        masking.apply_mask(mean_state_relevance_img, sub_bold_mask),
+        95
+      )
       
       # surface
-      plotting.plot_img_on_surf(mean_state_relevance_img,
-                                views=['lateral', 'medial', 'ventral'],
-                                hemispheres=['left', 'right'],
-                                title='State: {}'.format(state),
-                                colorbar=True,
-                                cmap='inferno',
-                                threshold=threshold);
-      plt.savefig(sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_surf_brainmap.png'.format(
-        subject, task, run, state), dpi=200)
+      plotting.plot_img_on_surf(
+        mean_state_relevance_img,
+        views=['lateral', 'medial', 'ventral'],
+        hemispheres=['left', 'right'],
+        title='State: {}'.format(state),
+        colorbar=True,
+        cmap='inferno',
+        threshold=threshold
+      );
+      plt.savefig(
+        sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_surf_brainmap.png'.format(
+          subject, task, run, state), dpi=200)
       plt.clf()
       
       # axial slices
-      plotting.plot_stat_map(mean_state_relevance_img,
-                             display_mode='z',
-                             cut_coords=30,
-                             cmap=plt.cm.seismic,
-                             threshold=threshold)
-      plt.savefig(sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_axial_slices.png'.format(
-        subject, task, run, state), dpi=200)
+      plotting.plot_stat_map(
+        mean_state_relevance_img,
+        display_mode='z',
+        cut_coords=30,
+        cmap=plt.cm.seismic,
+        threshold=threshold
+      )
+      plt.savefig(
+        sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevance_axial_slices.png'.format(
+          subject, task, run, state), dpi=200)
       plt.clf()
 
   if verbose:

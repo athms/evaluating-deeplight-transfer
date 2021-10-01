@@ -10,14 +10,28 @@ def main():
   np.random.seed(13089)
 
   ap = argparse.ArgumentParser()
-  ap.add_argument("--ACCESS-KEY", required=True,
-                  help="AWS S3 access key")
-  ap.add_argument("--SECRET-KEY", required=True,
-                  help="AWS S3 secret key")
-  ap.add_argument("--path", required=False, default='../data/',
-                  help="path to store data (default: ../data/)")
-  ap.add_argument("-n", required=False, default=3,
-                  help="number of subjects to download per HCP task (1-500) (default: 3)")
+  ap.add_argument(
+    "--ACCESS-KEY",
+    required=True,
+    help="AWS S3 access key"
+  )
+  ap.add_argument(
+    "--SECRET-KEY",
+    required=True,
+    help="AWS S3 secret key"
+  )
+  ap.add_argument(
+    "--path",
+    required=False,
+    default='../data/',
+    help="path to store data (default: ../data/)"
+  )
+  ap.add_argument(
+    "-n",
+    required=False,
+    default=3,
+    help="number of subjects to download per HCP task (1-500) (default: 3)"
+  )
   
   args = ap.parse_args()
   ACCESS_KEY = str(args.ACCESS_KEY)
@@ -35,7 +49,8 @@ def main():
         hcprep.download.download_subject_data(
           ACCESS_KEY=ACCESS_KEY, SECRET_KEY=SECRET_KEY,
           subject=subject, task=task, run=run,
-          output_path=path)
+          output_path=path
+        )
 
 
 if __name__ == '__main__':
