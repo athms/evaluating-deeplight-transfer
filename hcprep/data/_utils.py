@@ -13,7 +13,7 @@ def _generate_ev_df(
     task,
     subject,
     run):
-    
+
     if task not in [
         'EMOTION',
         'SOCIAL',
@@ -80,6 +80,7 @@ def _init_datadict(
     runs,
     path,
     t_r):
+
     f = {'anat': None, 'anat_mni': None, 'tr': t_r, 'runs': runs}
     for ri, run in enumerate(runs):
         n_tr = np.int(
@@ -111,8 +112,6 @@ def _add_markers_to_datadict(
     n_volumes_add_trial_end=1):
 
     t_r = f['tr']
-
-    # recode stimulus classes
     event_types = EV['event_type'].values
     unique_event_types = np.sort(np.unique(event_types))
     numerical_event_types = np.arange(unique_event_types.size)
@@ -156,6 +155,7 @@ def _load_subject_data(
     runs,
     path,
     t_r):
+    
     f = _init_datadict(subject, task, runs, path, t_r)
     EV_list = []
     for run in runs:

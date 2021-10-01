@@ -79,5 +79,6 @@ def _check_key_exists(
     key,
     bucket,
     prefix):
+    
     keys = [o.key for o in bucket.objects.filter(Prefix=prefix)]
     return key in keys

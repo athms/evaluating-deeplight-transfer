@@ -68,7 +68,7 @@ def retrieve_subject_ids(
             subject = o.key.split('/')[1]
             if (check_subject_data_present(bucket, subject, task, runs)
                 and subject not in subject_ids):
-                    subject_ids.append(subject)
+                subject_ids.append(subject)
         if len(subject_ids) >= n:
             break
     return subject_ids
@@ -130,7 +130,7 @@ def download_file_from_bucket(
             print('downloading {}  to  {}'.format(bucket_id, output_file))
             bucket.download_file(bucket_id, output_file)
         except botocore.exceptions.ClientError as e:
-            # If a client error is thrown, then check that it was a 404 error.
+            # If a client error is thrown, then check if it was a 404 error.
             # If it was a 404 error, then the bucket id does not exist.
             error_code = e.response['Error']['Code']
             if error_code == '404':
