@@ -74,7 +74,7 @@ For further details on the experimental tasks and their cognitive states, [click
 
 
 ## 3. DeepLight
-`deeplight` is written for Python 3.6 and implements two DeepLight architectures ("2D" and "3D"), which can be accessed as `deeplight.two` (2D) and `deeplight.three` (3D).
+`deeplight` implements two DeepLight architectures ("2D" and "3D"), which can be accessed as `deeplight.two` (2D) and `deeplight.three` (3D).
 
 Importantly, both DeepLight architectures operate on the level of individual whole-brain fMRI volumes (e.g., individual TRs).
 
