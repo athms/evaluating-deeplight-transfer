@@ -62,16 +62,23 @@ class model(object):
           batch_size=self.batch_size,
           conv_keep_probs=self._conv_keep_probs,
           keep_prob=self._keep_prob,
-          return_logits=self.return_logits)
-      self._volume = tf.placeholder(tf.float32,
-        [self.batch_size*self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+          return_logits=self.return_logits
+        )
+      self._volume = tf.placeholder(
+        tf.float32,
+        [self.batch_size*self.input_shape[0],
+         self.input_shape[1],
+         self.input_shape[2], 1]
+      )
       self._logits = self.model.forward(self._volume)
       self._tvars = tf.trainable_variables()
 
     self.sess.run(tf.global_variables_initializer())
 
-    self._path_pretrained_tvars = os.path.join(os.path.dirname(deeplight.__file__),
-      'two', 'pretrained_model', 'model-2D_DeepLight_desc-pretrained_model.npy')
+    self._path_pretrained_tvars = os.path.join(
+      os.path.dirname(deeplight.__file__),
+      'two', 'pretrained_model', 'model-2D_DeepLight_desc-pretrained_model.npy'
+    )
     if self.pretrained:
       self.load_weights(self._path_pretrained_tvars)
 
@@ -122,7 +129,12 @@ class model(object):
     volume = self._tranpose_volumes(volume)
     volume = self._stack_volumes(volume)
     return self.sess.run(self._logits,
-        feed_dict={self._volume: volume, self._keep_prob: 1, self._conv_keep_probs: np.ones(3)})
+        feed_dict={
+          self._volume: volume,
+          self._keep_prob: 1,
+          self._conv_keep_probs: np.ones(3)
+          }
+        )
 
   def fit(self,
     train_files: list,
@@ -162,7 +174,8 @@ class model(object):
         DataFrame: Training history.
     """
     os.makedirs(output_path, exist_ok=True)
-    return _fit(self,
+    return _fit(
+      self,
       train_files=train_files,
       validation_files=validation_files,
       n_onehot=n_onehot,
@@ -175,7 +188,8 @@ class model(object):
       output_path=output_path,
       verbose=self.verbose,
       shuffle_buffer_size=shuffle_buffer_size,
-      n_workers=n_workers)
+      n_workers=n_workers
+    )
 
   def setup_lrp(self):
     """Setup LRP computation, as specified in Thomas et al., 2021.
@@ -206,6 +220,13 @@ class model(object):
     volume = self._add_channel_dim(volume)
     volume = self._tranpose_volumes(volume)
     volume = self._stack_volumes(volume)
-    R = self.sess.run(self._R, feed_dict={self._volume: volume, self._keep_prob: 1, self._conv_keep_probs: np.ones(3)})
+    R = self.sess.run(
+      self._R,
+      feed_dict={
+        self._volume: volume,
+        self._keep_prob: 1,
+        self._conv_keep_probs: np.ones(3)
+      }
+    )
     R = self._unstack_volumes(R)
     return self._tranpose_volumes(R)[...,0] # removing channel dim

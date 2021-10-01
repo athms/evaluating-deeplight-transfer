@@ -88,14 +88,28 @@ class LSTM(Module):
 
     def _init_cell(self):
       """Initialze cell."""
-      self.h = [tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)]
-      self.c = [tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)]
-      self.h_out = [tf.zeros((self.batch_size, 1, self.dim*2)) for _ in range(self.seq_length)]
+      self.h = [
+        tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)
+      ]
+      self.c = [
+        tf.zeros((self.dim, self.batch_size)) for _ in range(self.seq_length+1)
+      ]
+      self.h_out = [
+        tf.zeros((self.batch_size, 1, self.dim*2)) for _ in range(self.seq_length)
+      ]
 
-      self.gates_xh = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
-      self.gates_hh = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
-      self.gates_pre = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
-      self.gates = [tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)]
+      self.gates_xh = [
+        tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)
+      ]
+      self.gates_hh = [
+        tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)
+      ]
+      self.gates_pre = [
+        tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)
+      ]
+      self.gates = [
+        tf.zeros((self.dim*4, self.batch_size)) for _ in range(self.seq_length)
+      ]
 
 
     def forward(self, x):
@@ -210,30 +224,38 @@ class LSTM(Module):
         j_gate_pre = tf.gather(self.gates_pre[t], self.j_idx)
 
         self.Rc[t] += self.Rh[t]
-        self.Rc[t-1] = self.propagation_rule(f_gate * self.c[t-1],
-                                              tf.eye((self.dim)),
-                                              tf.zeros((self.dim)),
-                                              self.c[t],
-                                              self.Rc[t],
-                                              2*self.dim)
-        self.Rg[t] = self.propagation_rule(i_gate * j_gate,
-                                            tf.eye((self.dim)),
-                                            tf.zeros((self.dim)),
-                                            self.c[t],
-                                            self.Rc[t],
-                                            2*self.dim)
-        self.Rx[t] = self.propagation_rule(x_t,
-                                            tf.transpose(tf.gather(self.Wxh, self.j_idx)),
-                                            tf.gather(self.bxh, self.j_idx) + tf.gather(self.bhh, self.j_idx),
-                                            j_gate_pre,
-                                            self.Rg[t],
-                                            self.dim + self.input_dim)
-        self.Rh[t-1] = self.propagation_rule(self.h[t-1],
-                                              tf.transpose(tf.gather(self.Whh, self.j_idx)),
-                                              tf.gather(self.bxh, self.j_idx) + tf.gather(self.bhh, self.j_idx),
-                                              j_gate_pre,
-                                              self.Rg[t],
-                                              self.dim + self.input_dim)
+        self.Rc[t-1] = self.propagation_rule(
+          f_gate * self.c[t-1],
+          tf.eye((self.dim)),
+          tf.zeros((self.dim)),
+          self.c[t],
+          self.Rc[t],
+          2*self.dim
+        )
+        self.Rg[t] = self.propagation_rule(
+          i_gate * j_gate,
+          tf.eye((self.dim)),
+          tf.zeros((self.dim)),
+          self.c[t],
+          self.Rc[t],
+          2*self.dim
+        )
+        self.Rx[t] = self.propagation_rule(
+          x_t,
+          tf.transpose(tf.gather(self.Wxh, self.j_idx)),
+          tf.gather(self.bxh, self.j_idx) + tf.gather(self.bhh, self.j_idx),
+          j_gate_pre,
+          self.Rg[t],
+          self.dim + self.input_dim
+        )
+        self.Rh[t-1] = self.propagation_rule(
+          self.h[t-1],
+          tf.transpose(tf.gather(self.Whh, self.j_idx)),
+          tf.gather(self.bxh, self.j_idx) + tf.gather(self.bhh, self.j_idx),
+          j_gate_pre,
+          self.Rg[t],
+          self.dim + self.input_dim
+        )
 
       Rout = []
       for sample in range(self.batch_size):
