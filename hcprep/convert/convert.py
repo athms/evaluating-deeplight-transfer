@@ -3,11 +3,17 @@ import numpy as np
 import tensorflow as tf
 
 
-def write_func_to_tfr(tfr_writers,
-                 func_data, states, trs,
-                 subject_id, task_id, run_id,
-                 n_onehot, onehot_task_idx,
-                 randomize_volumes=True):
+def write_func_to_tfr(
+    tfr_writers,
+    func_data,
+    states,
+    trs,
+    subject_id,
+    task_id,
+    run_id,
+    n_onehot,
+    onehot_task_idx,
+    randomize_volumes=True):
     """Writes fMRI volumes and labels to TFRecord files.
 
     Args:
@@ -49,18 +55,27 @@ def write_func_to_tfr(tfr_writers,
         tr = trs[vi]
         v_sample = tf.train.Example(
             features=tf.train.Features(
-                feature={'volume': tf.train.Feature(float_list=tf.train.FloatList(value=list(volume))),
-                         'task_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(task_id)])),
-                         'subject_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(subject_id)])),
-                         'run_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(run_id)])),
-                         'tr': tf.train.Feature(float_list=tf.train.FloatList(value=[np.float32(tr)])),
-                         'state': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(state)])),
-                         'onehot': tf.train.Feature(int64_list=tf.train.Int64List(value=list(state_onehot.astype(np.int64))))}))
+                feature={
+                    'volume': tf.train.Feature(float_list = tf.train.FloatList( value = list(volume) )),
+                    'task_id': tf.train.Feature(int64_list = tf.train.Int64List( value = [np.int64(task_id)] )),
+                    'subject_id': tf.train.Feature(int64_list = tf.train.Int64List( value = [np.int64(subject_id)] )),
+                    'run_id': tf.train.Feature(int64_list = tf.train.Int64List( value = [np.int64(run_id)] )),
+                    'tr': tf.train.Feature(float_list = tf.train.FloatList( value = [np.float32(tr)] )),
+                    'state': tf.train.Feature(int64_list = tf.train.Int64List( value = [np.int64(state)] )),
+                    'onehot': tf.train.Feature(int64_list = tf.train.Int64List( value = list(state_onehot.astype(np.int64)) ))
+                }
+            )
+        )
         serialized = v_sample.SerializeToString()
         writer.write(serialized)
 
 
-def parse_func_tfr(example_proto, nx, ny, nz, n_onehot=None, onehot_idx=None, only_parse_XY=False):
+def parse_func_tfr(
+    example_proto,
+    nx, ny, nz,
+    n_onehot=None,
+    onehot_idx=None,
+    only_parse_XY=False):
     """Parse TFR-data
 
     Args:
@@ -89,13 +104,15 @@ def parse_func_tfr(example_proto, nx, ny, nz, n_onehot=None, onehot_idx=None, on
             volume, task_id, subject_id, run_id, volume_idx,
             label, label_onehot are returned
     """
-    features = {'volume': tf.FixedLenFeature([nx*ny*nz], tf.float32),
-                'task_id': tf.FixedLenFeature([1], tf.int64),
-                'subject_id': tf.FixedLenFeature([1], tf.int64),
-                'run_id': tf.FixedLenFeature([1], tf.int64),
-                'tr': tf.FixedLenFeature([1], tf.float32),
-                'state': tf.FixedLenFeature([1], tf.int64),
-                'onehot': tf.FixedLenFeature([n_onehot], tf.int64)}
+    features = {
+        'volume': tf.FixedLenFeature([nx*ny*nz], tf.float32),
+        'task_id': tf.FixedLenFeature([1], tf.int64),
+        'subject_id': tf.FixedLenFeature([1], tf.int64),
+        'run_id': tf.FixedLenFeature([1], tf.int64),
+        'tr': tf.FixedLenFeature([1], tf.float32),
+        'state': tf.FixedLenFeature([1], tf.int64),
+        'onehot': tf.FixedLenFeature([n_onehot], tf.int64)
+    }
     parsed_features = tf.parse_single_example(example_proto, features)
 
     if onehot_idx is None:
@@ -115,12 +132,3 @@ def parse_func_tfr(example_proto, nx, ny, nz, n_onehot=None, onehot_idx=None, on
                 "run_id": parsed_features["run_id"],
                 "tr": parsed_features["tr"],
                 "state": parsed_features["state"]}
-        features = {}
-        features['volume'] = volume
-        features['onehot'] = onehot
-        features['task_id'] = parsed_features['task_id']
-        features['subject_id'] = parsed_features['subject_id']
-        features['run_id'] = parsed_features['run_id']
-        features['tr'] = parsed_features['tr']
-        features['state'] = parsed_features["state"]
-        return features
