@@ -7,21 +7,36 @@ from nilearn.image import load_img, index_img, concat_imgs
 from ..data._utils import _load_subject_data
 
 
-def _clean_func(func, mask, smoothing_fwhm=3, high_pass=1./128., t_r=0.72):
-    masked_func = apply_mask(func,
-                             mask,
-                             smoothing_fwhm=smoothing_fwhm,
-                             ensure_finite=True)
-    masked_func = clean(masked_func,
-                        detrend=True,
-                        standardize=True,
-                        high_pass=high_pass,
-                        t_r=t_r,
-                        ensure_finite=True)
+def _clean_func(
+    func,
+    mask,
+    smoothing_fwhm=3,
+    high_pass=1./128.,
+    t_r=0.72):
+    
+    masked_func = apply_mask(
+        func,
+        mask,
+        smoothing_fwhm=smoothing_fwhm,
+        ensure_finite=True
+    )
+
+    masked_func = clean(
+        masked_func,
+        detrend=True,
+        standardize=True,
+        high_pass=high_pass,
+        t_r=t_r,
+        ensure_finite=True
+    )
     return unmask(masked_func, mask)
 
 
-def preprocess_subject_data(subject_data, runs, high_pass=None, smoothing_fwhm=None):
+def preprocess_subject_data(
+    subject_data,
+    runs,
+    high_pass=None,
+    smoothing_fwhm=None):
     """Clean and return the voxel time-series signal of 
     a subject in a task.
 
@@ -49,13 +64,19 @@ def preprocess_subject_data(subject_data, runs, high_pass=None, smoothing_fwhm=N
     labels = []
     trs = []
     for run in runs:
+        
         func_run = load_img(subject_data[run]['func_mni'])
         mask_run = load_img(subject_data[run]['func_mask_mni'])
         tr_run = subject_data[run]['onset']
-
         trial_type = subject_data[run]['trial_type']
-        cleaned_func = _clean_func(func_run, mask_run,
-            smoothing_fwhm=smoothing_fwhm, high_pass=high_pass, t_r=subject_data['tr'])
+        
+        cleaned_func = _clean_func(
+            func_run,
+            mask_run,
+            smoothing_fwhm=smoothing_fwhm,
+            high_pass=high_pass,
+            t_r=subject_data['tr']
+        )
 
         valid_volume_idx = np.isfinite(trial_type)
         valid_func = index_img(cleaned_func, valid_volume_idx)

@@ -6,7 +6,11 @@ import numpy as np
 from ._utils import _load_subject_data, _generate_ev_df
 
 
-def summarize_subject_EVs(task, subject, runs, path):
+def summarize_subject_EVs(
+    task,
+    subject,
+    runs,
+    path):
     """Summarize EV data of a task and subject, across runs.
 
     Args:
@@ -40,7 +44,12 @@ def summarize_subject_EVs(task, subject, runs, path):
         return None
 
 
-def load_subject_data(task, subject, runs, path, t_r=0.72):
+def load_subject_data(
+    task,
+    subject,
+    runs,
+    path,
+    t_r=0.72):
     """Return a dict summarizing the data of a
     subject in a run of a task.
 

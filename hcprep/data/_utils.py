@@ -7,30 +7,46 @@ from nilearn.image import load_img
 from .. import paths
 
 
-def _generate_ev_df(path, ev_filenames, task, subject, run):
+def _generate_ev_df(
+    path,
+    ev_filenames,
+    task,
+    subject,
+    run):
     
-    if task not in ['EMOTION', 'SOCIAL', 'GAMBLING', 'LANGUAGE', 'RELATIONAL', 'MOTOR', 'WM']:
+    if task not in [
+        'EMOTION',
+        'SOCIAL',
+        'GAMBLING',
+        'LANGUAGE',
+        'RELATIONAL',
+        'MOTOR',
+        'WM']:
         raise NameError('Invalid task type.')
 
     df_list = []
     for f in ev_filenames:
 
-        if 'win.txt' in f or 'loss.txt' in f or 'neut.txt' in f:
+        if task is 'GAMBLING' and (
+            'win.txt' in f
+            or 'loss.txt' in f
+            or 'neut.txt' in f):
             continue
 
-        event_type = f.split('desc-')[-1]
+        event_type = f.split('.')[0].split('desc-EV_')[-1]
         if task is 'SOCIAL':
-            if '_resp' not in f:
-                continue
-            else:
+            if '_resp' in f:
                 event_type = event_type.split('_')[-2]
+            else:
+                continue
         elif task is 'WM':
             event_type = event_type.split('_')[-1]
         else:
             event_type = event_type.split('_')[0]
         
-        if event_type is 'cue':
+        if 'cue' in event_type:
             continue
+
         if task is 'WM' and event_type not in ['body', 'faces', 'places', 'tools']:
             continue
         
@@ -40,14 +56,16 @@ def _generate_ev_df(path, ev_filenames, task, subject, run):
             print('/!\ Skipping {} because it is empty.'.format(path+f))
             continue
 
-        df_tmp = pd.DataFrame({'subject': subject,
-                                'task': task,
-                                'run': run,
-                                'event_type': event_type,
-                                'onset': ev_mat[:, 0],
-                                'duration': ev_mat[:, 1],
-                                'end': ev_mat[:, 0] + ev_mat[:, 1]})
-
+        df_tmp = pd.DataFrame(
+            {'subject': subject,
+             'task': task,
+             'run': run,
+             'event_type': event_type,
+             'onset': ev_mat[:, 0],
+             'duration': ev_mat[:, 1],
+             'end': ev_mat[:, 0] + ev_mat[:, 1]
+            }
+        )
         df_list.append(df_tmp)
 
     if df_list:
@@ -56,14 +74,19 @@ def _generate_ev_df(path, ev_filenames, task, subject, run):
       return None
 
 
-def _init_datadict(subject,
-                   task,
-                   runs,
-                   path,
-                   t_r):
+def _init_datadict(
+    subject,
+    task,
+    runs,
+    path,
+    t_r):
     f = {'anat': None, 'anat_mni': None, 'tr': t_r, 'runs': runs}
     for ri, run in enumerate(runs):
-        n_tr = np.int(load_img(paths.path_bids_func_mni(subject, task, run, path)).shape[-1])
+        n_tr = np.int(
+            load_img(
+                paths.path_bids_func_mni(subject, task, run, path)
+            ).shape[-1]
+        )
         f[run] = {
             'func': None,
             'func_mni': paths.path_bids_func_mni(subject, task, run, path),
@@ -81,7 +104,11 @@ def _init_datadict(subject,
     return f
 
 
-def _add_markers_to_datadict(f, EV, n_volumes_discard_trial_onset=1, n_volumes_add_trial_end=1):
+def _add_markers_to_datadict(
+    f,
+    EV,
+    n_volumes_discard_trial_onset=1,
+    n_volumes_add_trial_end=1):
 
     t_r = f['tr']
 
@@ -106,7 +133,6 @@ def _add_markers_to_datadict(f, EV, n_volumes_discard_trial_onset=1, n_volumes_a
         trials = np.sort(run_data['trial'].values)
         for trial in trials:
             trial_data = run_data[run_data['trial'] == trial].copy()
-
             trial_type = trial_data['event_num'].values[0]
             run = trial_data['run'].values[0]
             trial_onset = trial_data['onset'].values[0]
@@ -124,7 +150,12 @@ def _add_markers_to_datadict(f, EV, n_volumes_discard_trial_onset=1, n_volumes_a
     return f
 
 
-def _load_subject_data(subject, task, runs, path, t_r):
+def _load_subject_data(
+    subject,
+    task,
+    runs,
+    path,
+    t_r):
     f = _init_datadict(subject, task, runs, path, t_r)
     EV_list = []
     for run in runs:
