@@ -3,7 +3,6 @@ __pycache__
 */.DS_Store
 *.DS_Store
 *.ipynb_checkpoint*
-data/
 results/
 .vscode
 *.egg-info/
