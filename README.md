@@ -1,6 +1,6 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
-This repository contains two python packages: 
+This repository contains two python packages, which are writen for Python 3.6: 
 - `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services).
 - `deeplight` is a simple python package that allows to easily apply two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below) to whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
 - `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
@@ -74,7 +74,7 @@ For further details on the experimental tasks and their cognitive states, [click
 
 
 ## 3. DeepLight
-`deeplight` implements two DeepLight architectures ("2D" and "3D"), which can be accessed as `deeplight.two` (2D) and `deeplight.three` (3D).
+`deeplight` is written for Python 3.6 and implements two DeepLight architectures ("2D" and "3D"), which can be accessed as `deeplight.two` (2D) and `deeplight.three` (3D).
 
 Importantly, both DeepLight architectures operate on the level of individual whole-brain fMRI volumes (e.g., individual TRs).
 
