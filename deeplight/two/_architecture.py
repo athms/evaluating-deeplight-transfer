@@ -163,6 +163,18 @@ def _init_model(
   """Setup 2D-DeepLight architecture,
   as specified in Thomas et al., 2021"""
   nz, ny, nx = input_shape
-  return modules.Sequential(_feature_extractor(nx=nx, ny=ny, nz=nz, batch_size=batch_size, conv_keep_probs=conv_keep_probs) +
-                            _lstm_bidirectional(nz=nz, batch_size=batch_size, n_classes=n_classes, keep_prob=keep_prob) +
-                            _output_unit(n_classes=n_classes, return_logits=return_logits))
+  return modules.Sequential(
+    _feature_extractor(
+      nx=nx, ny=ny, nz=nz,
+      batch_size=batch_size,
+      conv_keep_probs=conv_keep_probs
+      ) +
+    _lstm_bidirectional(
+      nz=nz,
+      batch_size=batch_size,
+       n_classes=n_classes, keep_prob=keep_prob) +
+    _output_unit(
+      n_classes=n_classes,
+      return_logits=return_logits
+    )
+  )

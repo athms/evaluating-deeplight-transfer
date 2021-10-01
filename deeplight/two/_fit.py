@@ -40,7 +40,13 @@ def _fit(self,
   iterator = dataset.make_initializable_iterator()
   volume, onehot = iterator.get_next()
   # TODO: avoid hardcoding reshape
-  volume = tf.reshape(volume, [self.batch_size*self.input_shape[2], self.input_shape[1], self.input_shape[0], 1])
+  volume = tf.reshape(
+    volume,
+    [self.batch_size*self.input_shape[2],
+     self.input_shape[1],
+     self.input_shape[0],
+     1]
+  )
 
   with tf.variable_scope('model', reuse=tf.AUTO_REUSE): 
     logits = self.model.forward(volume)
@@ -75,8 +81,12 @@ def _fit(self,
     with tqdm(total=training_steps) as pbar:
       for step_train in range(1,training_steps+1):
         try:
-          _, batch_acc, batch_xe = self.sess.run([optimizer_step, accuracy, avg_Xentropy],
-            feed_dict={self._keep_prob: 0.5, self._conv_keep_probs: np.array([1, .8, .6])})
+          _, batch_acc, batch_xe = self.sess.run(
+            [optimizer_step, accuracy, avg_Xentropy],
+            feed_dict={self._keep_prob: 0.5,
+              self._conv_keep_probs: np.array([1, .8, .6])
+            }
+          )
           xe_train += batch_xe
           acc_train += batch_acc
           pbar.set_description(
@@ -105,12 +115,18 @@ def _fit(self,
       print('Val. data: acc: {:02f} - loss: {:02f}'.format(
         acc_val/float(step_val), xe_val/float(step_val)))
 
-    history.append(pd.DataFrame({'epoch': epoch,
-                                  'accuracy': acc_train/float(step_train),
-                                  'loss': xe_train/float(step_train),
-                                  'val_accuracy': acc_val/float(step_val),
-                                  'val_loss': xe_val/float(step_val)},
-                                  index=np.array([epoch-1])))
+    history.append(
+      pd.DataFrame(
+        {
+        'epoch': epoch,
+        'accuracy': acc_train/float(step_train),
+        'loss': xe_train/float(step_train),
+        'val_accuracy': acc_val/float(step_val),
+        'val_loss': xe_val/float(step_val)
+        }, 
+        index=np.array([epoch-1])
+      )
+    )
     pd.concat(history).to_csv(output_path+'history.csv')
 
     self.save_weights(path=output_path+"epoch-{:03d}.npy".format(epoch))

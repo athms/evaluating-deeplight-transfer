@@ -9,8 +9,17 @@ def _make_callbacks(output_path: str):
   # model checkpoint
   filepath = output_path+"epoch-{epoch:03d}.h5"
   checkpoint = tf.keras.callbacks.ModelCheckpoint(
-  filepath, monitor='val_acc', verbose=1, save_best_only=False, period=1)
-  csv_logger = tf.keras.callbacks.CSVLogger(output_path+'history.csv', separator=",", append=True)
+    filepath,
+    monitor='val_acc',
+    verbose=1,
+    save_best_only=False,
+    period=1
+  )
+  csv_logger = tf.keras.callbacks.CSVLogger(
+    output_path+'history.csv',
+    separator=",",
+    append=True
+  )
   return [checkpoint, csv_logger]
 
 
@@ -44,7 +53,8 @@ def _fit(self,
     n_onehot=n_onehot,
     onehot_idx=onehot_idx,
     shuffle_buffer_size=shuffle_buffer_size,
-    n_workers=n_workers)
+    n_workers=n_workers
+  )
   
   val_dataset = io.make_dataset(
     files=validation_files,
@@ -61,13 +71,16 @@ def _fit(self,
     onehot_idx=onehot_idx,
     shuffle_buffer_size=shuffle_buffer_size,
     scope_name='validation',
-    n_workers=n_workers)
+    n_workers=n_workers
+  )
   
   callbacks = _make_callbacks(output_path)
   
-  self.model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
-                loss='categorical_crossentropy',
-                metrics=['accuracy'])
+  self.model.compile(
+    optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+  )
   
   if verbose:
     print('Starting training...')
@@ -80,6 +93,7 @@ def _fit(self,
     callbacks=callbacks,
     verbose=np.int(verbose),
     use_multiprocessing=n_workers>1,
-    workers=n_workers)
+    workers=n_workers
+  )
   
   return (history, self.model)

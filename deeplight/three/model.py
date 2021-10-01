@@ -50,9 +50,11 @@ class model(object):
       print('\tn-states: {}'.format(self.n_states))
       print('\tbatch-size: {}'.format(self.batch_size))
 
-    self.model = _init_model(keras=tf.keras,
+    self.model = _init_model(
+      keras=tf.keras,
       input_shape=self.input_shape, n_classes=self.n_states,
-      batch_size=self.batch_size, return_logits=self.return_logits)
+      batch_size=self.batch_size, return_logits=self.return_logits
+    )
 
     if self.pretrained:
       self._path_pretrained_weights = os.path.join(os.path.dirname(deeplight.__file__),
@@ -133,7 +135,8 @@ class model(object):
     """
     os.makedirs(output_path, exist_ok=True)
 
-    (history, model) = _fit(self,
+    (history, model) = _fit(
+      self,
       train_files=train_files,
       validation_files=validation_files,
       n_onehot=n_onehot,
@@ -146,7 +149,8 @@ class model(object):
       output_path=output_path,
       verbose=self.verbose,
       shuffle_buffer_size=shuffle_buffer_size,
-      n_workers=n_workers)
+      n_workers=n_workers
+    )
 
     self.model = model
 
@@ -166,7 +170,8 @@ class model(object):
       input_shape=self.input_shape,
       n_classes=self.n_states,
       batch_size=self.batch_size,
-      return_logits=self.return_logits)
+      return_logits=self.return_logits
+    )
     
     for model_layer, stored_model_layer in zip(analyzer_model.layers, self.model.layers):
       model_layer.set_weights(stored_model_layer.get_weights())
@@ -174,7 +179,8 @@ class model(object):
     self._analyzer = innvestigate.analyzer.relevance_based.relevance_analyzer.LRPSequentialPresetBFlat(
       model=analyzer_model,
       neuron_selection_mode="index",
-      epsilon=1e-6)
+      epsilon=1e-6
+    )
 
   def interpret(self, volume):
     """Interpret decoding decision for volume.

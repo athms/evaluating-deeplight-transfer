@@ -26,14 +26,18 @@ def clean_func(
   Returns:
       niimg: Cleaned func data.
   """
-  masked_func = apply_mask(func,
-                            mask,
-                            smoothing_fwhm=smoothing_fwhm,
-                            ensure_finite=True)
-  masked_func = clean(masked_func,
-                      detrend=True,
-                      standardize=True,
-                      high_pass=high_pass,
-                      t_r=tr,
-                      ensure_finite=True)
+  masked_func = apply_mask(
+      func,
+      mask,
+      smoothing_fwhm=smoothing_fwhm,
+      ensure_finite=True
+  )
+  masked_func = clean(
+    masked_func,
+    detrend=True,
+    standardize=True,
+    high_pass=high_pass,
+    t_r=tr,
+    ensure_finite=True
+  )
   return unmask(masked_func, mask)

@@ -52,13 +52,17 @@ def write_func_to_tfr(
     tr = trs[vi]
     v_sample = tf.train.Example(
       features=tf.train.Features(
-        feature={'volume': tf.train.Feature(float_list=tf.train.FloatList(value=list(volume))),
-                  'task_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(task_id)])),
-                  'subject_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(subject_id)])),
-                  'run_id': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(run_id)])),
-                  'tr': tf.train.Feature(float_list=tf.train.FloatList(value=[np.float32(tr)])),
-                  'state': tf.train.Feature(int64_list=tf.train.Int64List(value=[np.int64(state)])),
-                  'onehot': tf.train.Feature(int64_list=tf.train.Int64List(value=list(state_onehot.astype(np.int64))))}))
+        feature={
+            'volume': tf.train.Feature( float_list = tf.train.FloatList(value=list(volume)) ),
+            'task_id': tf.train.Feature( int64_list = tf.train.Int64List(value=[np.int64(task_id)]) ),
+            'subject_id': tf.train.Feature( int64_list = tf.train.Int64List(value=[np.int64(subject_id)]) ),
+            'run_id': tf.train.Feature( int64_list = tf.train.Int64List(value=[np.int64(run_id)]) ),
+            'tr': tf.train.Feature( float_list = tf.train.FloatList(value=[np.float32(tr)]) ),
+            'state': tf.train.Feature( int64_list = tf.train.Int64List(value=[np.int64(state)]) ),
+            'onehot': tf.train.Feature( int64_list = tf.train.Int64List(value=list(state_onehot.astype(np.int64))) )
+            }
+        )
+    )
     serialized = v_sample.SerializeToString()
     writer.write(serialized)
 

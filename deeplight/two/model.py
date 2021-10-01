@@ -200,8 +200,13 @@ class model(object):
         print("\tSetting up LRP analyzer..")
     with tf.variable_scope('relevance', reuse=tf.AUTO_REUSE):
         # subset logits to predicted class
-        self._R = tf.where(tf.equal(tf.one_hot(tf.argmax(self._logits, axis=1), depth=self.n_states), 1),
-          self._logits, tf.zeros_like(self._logits))
+        self._R = tf.where( 
+          tf.equal(
+            tf.one_hot(tf.argmax(self._logits, axis=1), depth=self.n_states),
+            1),
+          self._logits,
+          tf.zeros_like(self._logits)
+        )
         # backpropagate relevances
         for layer in self.model.modules[::-1]:
           self._R = self.model.lrp_layerwise(layer, self._R, 'epsilon', 1e-3)

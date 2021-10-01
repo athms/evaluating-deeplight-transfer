@@ -37,9 +37,11 @@ class Dropout(Module):
             dropout = tf.cond(
                 dropout_check, dropout_check_true, dropout_check_false)
 
-            self.activations = tf.nn.dropout(self.input_tensor,
-                                             keep_prob=dropout,
-                                             noise_shape=self.noise_shape)
+            self.activations = tf.nn.dropout(
+                self.input_tensor,
+                keep_prob=dropout,
+                noise_shape=self.noise_shape
+            )
             tf.summary.histogram('activations', self.activations)
 
         return self.activations

@@ -57,24 +57,40 @@ class LSTM(Module):
         def _input_dropout_check_true():
             return tf.cast(tf.multiply(self.input_keep_prob, 1), dtype=tf.float32)
         _input_dropout_check = self.input_keep_prob <= tf.constant(1.0)
-        self.input_keep_prob_tensor = tf.cond(_input_dropout_check,
-                                              _input_dropout_check_true,
-                                              _dropout_check_false)
+        self.input_keep_prob_tensor = tf.cond(
+          _input_dropout_check,
+          _input_dropout_check_true,
+          _dropout_check_false
+        )
         def _output_dropout_check_true():
             return tf.cast(tf.multiply(self.output_keep_prob, 1), dtype=tf.float32)
         output_dropout_check = self.output_keep_prob <= tf.constant(1.0)
-        self.output_keep_prob_tensor = tf.cond(output_dropout_check,
-                                                _output_dropout_check_true,
-                                                _dropout_check_false)
+        self.output_keep_prob_tensor = tf.cond(
+          output_dropout_check,
+          _output_dropout_check_true,
+          _dropout_check_false
+        )
 
-        self.Wxh = tf.get_variable(self.name+'/weights_xh',
-          shape=[4 * self.dim, self.input_dim], initializer=weights_init)
-        self.bxh = tf.get_variable(self.name+'/biases_xh',
-          shape=[4 * self.dim], initializer=bias_init)
-        self.Whh = tf.get_variable(self.name+'/weights_hh',
-          shape=[4 * self.dim, self.dim], initializer=weights_init)
-        self.bhh = tf.get_variable(self.name+'/biases_hh',
-          shape=[4 * self.dim], initializer=bias_init)
+        self.Wxh = tf.get_variable(
+          self.name+'/weights_xh',
+          shape=[4 * self.dim, self.input_dim],
+          initializer=weights_init
+        )
+        self.bxh = tf.get_variable(
+          self.name+'/biases_xh',
+          shape=[4 * self.dim],
+          initializer=bias_init
+        )
+        self.Whh = tf.get_variable(
+          self.name+'/weights_hh',
+          shape=[4 * self.dim, self.dim],
+          initializer=weights_init
+        )
+        self.bhh = tf.get_variable(
+          self.name+'/biases_hh',
+          shape=[4 * self.dim],
+          initializer=bias_init
+        )
         self.W = tf.concat([self.Wxh, self.Whh], axis=1)
 
         # i, f, o gate weight indices
@@ -136,7 +152,10 @@ class LSTM(Module):
 
         for t in range(self.seq_length):
 
-          x_t = tf.nn.dropout(tf.gather(self.x_time_first, t), keep_prob=self.input_keep_prob_tensor)
+          x_t = tf.nn.dropout(
+            tf.gather(self.x_time_first, t),
+            keep_prob=self.input_keep_prob_tensor
+          )
 
           self.gates_xh[t] = tf.matmul( self.Wxh, x_t) + tf.expand_dims(self.bxh, 1)
           self.gates_hh[t] = tf.matmul( self.Whh, self.h[t-1]) + tf.expand_dims(self.bhh, 1)
@@ -151,7 +170,9 @@ class LSTM(Module):
           self.h[t] = o_gate*tf.tanh(self.c[t])
           self.gates[t] = tf.concat([i_gate, j_gate, f_gate, o_gate], axis=0)
 
-          h_out = tf.transpose(tf.nn.dropout(self.h[t], keep_prob=self.output_keep_prob_tensor))
+          h_out = tf.transpose(
+            tf.nn.dropout(self.h[t], keep_prob=self.output_keep_prob_tensor)
+          )
 
         return h_out
 
@@ -172,9 +193,11 @@ class LSTM(Module):
       n_bias_units,
       bias_factor=0):
       """Epsilon LRP implementation"""
-      sign_out = tf.where(tf.greater_equal(hout, 0.),
-                          tf.ones_like(hout, dtype=tf.float32),
-                          -1.*tf.ones_like(hout, dtype=tf.float32))
+      sign_out = tf.where(
+        tf.greater_equal(hout, 0.),
+        tf.ones_like(hout, dtype=tf.float32),
+        1.*tf.ones_like(hout, dtype=tf.float32)
+      )
       sign_out = tf.expand_dims(sign_out, 0)
 
       numer = tf.expand_dims(weights, -1) * tf.expand_dims(hin, 1)
@@ -319,28 +342,32 @@ class LSTM_bidirectional(Module):
         self.output_keep_prob = output_keep_prob
         self.forget_bias = forget_bias
 
-        self.fw_cell = LSTM(dim,
-                            batch_size=self.batch_size,
-                            input_dim=self.input_dim,
-                            weights_init=weights_init,
-                            bias_init=bias_init,
-                            sequence_length=self.seq_length,
-                            input_keep_prob=self.input_keep_prob,
-                            output_keep_prob=self.output_keep_prob,
-                            forget_bias=self.forget_bias,
-                            name="lstm_fw")
+        self.fw_cell = LSTM(
+          dim,
+          batch_size=self.batch_size,
+          input_dim=self.input_dim,
+          weights_init=weights_init,
+          bias_init=bias_init,
+          sequence_length=self.seq_length,
+          input_keep_prob=self.input_keep_prob,
+          output_keep_prob=self.output_keep_prob,
+          forget_bias=self.forget_bias,
+          name="lstm_fw"
+        )
 
-        self.bw_cell = LSTM(dim,
-                            batch_size=self.batch_size,
-                            input_dim=self.input_dim,
-                            weights_init=weights_init,
-                            bias_init=bias_init,
-                            sequence_length=self.seq_length,
-                            input_keep_prob=self.input_keep_prob,
-                            output_keep_prob=self.output_keep_prob,
-                            forget_bias=self.forget_bias,
-                            reverse_input=True,
-                            name="lstm_bw")
+        self.bw_cell = LSTM(
+          dim,
+          batch_size=self.batch_size,
+          input_dim=self.input_dim,
+          weights_init=weights_init,
+          bias_init=bias_init,
+          sequence_length=self.seq_length,
+          input_keep_prob=self.input_keep_prob,
+          output_keep_prob=self.output_keep_prob,
+          forget_bias=self.forget_bias,
+          reverse_input=True,
+          name="lstm_bw"
+        )
 
 
     def forward(self, x):
