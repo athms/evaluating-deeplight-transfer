@@ -35,9 +35,9 @@ def main():
       for run_id, run in enumerate(hcp_info.runs):
 
         if not np.all([
-          os.path.isfile(hcprep.paths.path_bids_func_mni(subject, task, run, path)),
-          os.path.isfile(hcprep.paths.path_bids_func_mask_mni(subject, task, run, path)),
-          os.path.isfile(hcprep.paths.path_bids_EV(subject, task, run, path))
+          os.path.isfile( hcprep.paths.path_bids_func_mni(subject, task, run, path) ),
+          os.path.isfile( hcprep.paths.path_bids_func_mask_mni(subject, task, run, path) ),
+          os.path.isfile( hcprep.paths.path_bids_EV(subject, task, run, path) )
           ]):
           print('Skipping subejct {} task {} run {},"\
             "because BIDS data not fully present.'.format(subject, task, run))
@@ -49,7 +49,7 @@ def main():
             high_pass=1./128., smoothing_fwhm=3
           )
 
-          tfr_writers = [tf.io.TFRecordWriter(hcprep.paths.path_bids_tfr(subject, task, run, path))]
+          tfr_writers = [ tf.io.TFRecordWriter( hcprep.paths.path_bids_tfr(subject, task, run, path) ) ]
           
           deeplight.data.io.write_func_to_tfr(
             tfr_writers=tfr_writers,

@@ -101,7 +101,8 @@ def main():
   verbose = bool(int(args.verbose))
   data_path = str(args.data)
   if args.out is None:
-    out_path = '../results/models/DeepLight/{}/pretrained-{}/'.format(architecture, pretrained)
+    out_path = '../results/models/DeepLight/{}/pretrained-{}/'.format(
+      architecture, pretrained)
     print('"out" not defined. Defaulting to: {}'.format(out_path))    
   else:
     out_path = str(args.out)

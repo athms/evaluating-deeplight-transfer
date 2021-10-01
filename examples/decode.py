@@ -74,7 +74,8 @@ def main():
     out_path = str(args.out)
     print('Path: {}'.format(out_path))
   else:
-    out_path = '../results/predictions/DeepLight/{}/pretrained-{}/'.format(architecture, pretrained)
+    out_path = '../results/predictions/DeepLight/{}/pretrained-{}/'.format(
+      architecture, pretrained)
     print('"out" not defined. Defaulting to: {}'.format(out_path))
 
   # make sure task specification is valid

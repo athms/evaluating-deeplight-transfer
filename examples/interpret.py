@@ -77,7 +77,8 @@ def main():
     out_path = str(args.out)
     print('Path: {}'.format(out_path))
   else:
-    out_path = '../results/relevances/DeepLight/{}/brainmaps/'.format(architecture)
+    out_path = '../results/relevances/DeepLight/{}/brainmaps/'.format(
+      architecture)
     print('"out" not defined. Defaulting to: {}'.format(out_path))
 
   hcp_info = hcprep.info.basics()
@@ -160,7 +161,8 @@ def main():
         acc += np.sum(batch_pred[i].argmax() == batch_onehot[i].argmax())
         n += 1
         if verbose and (n%10) == 0:
-          print('\tDecoding accuracy after {} batches: {} %'.format(n, (acc/n)*100))
+          print('\tDecoding accuracy after {} batches: {} %'.format(
+            n, (acc/n)*100))
     except tf.errors.OutOfRangeError:
       break
   if verbose:

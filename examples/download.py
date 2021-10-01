@@ -47,8 +47,11 @@ def main():
     for subject in hcp_info.subjects[task][:n]:
       for run in hcp_info.runs:
         hcprep.download.download_subject_data(
-          ACCESS_KEY=ACCESS_KEY, SECRET_KEY=SECRET_KEY,
-          subject=subject, task=task, run=run,
+          ACCESS_KEY=ACCESS_KEY,
+          SECRET_KEY=SECRET_KEY,
+          subject=subject,
+          task=task,
+          run=run,
           output_path=path
         )
 
