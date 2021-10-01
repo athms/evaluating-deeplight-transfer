@@ -14,8 +14,8 @@ def main():
   ap = argparse.ArgumentParser()
   ap.add_argument("--path", required=False, default='../data/',
                   help="path where HCP data is stored (default: ../data/)")
-  args = vars(ap.parse_args())
-  path = str(args['path'])
+  args = ap.parse_args()
+  path = str(args.path)
   
   subjects = [int(f.split('sub-')[1]) for f in os.listdir(path) if 'sub' in f]
 

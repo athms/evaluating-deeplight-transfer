@@ -19,11 +19,11 @@ def main():
   ap.add_argument("-n", required=False, default=3,
                   help="number of subjects to download per HCP task (1-500) (default: 3)")
   
-  args = vars(ap.parse_args())
-  ACCESS_KEY = str(args['ACCESS_KEY'])
-  SECRET_KEY = str(args['SECRET_KEY'])
-  n = int(args['n'])
-  path = str(args["path"])
+  args = ap.parse_args()
+  ACCESS_KEY = str(args.ACCESS_KEY)
+  SECRET_KEY = str(args.SECRET_KEY)
+  n = int(args.n)
+  path = str(args.path)
   hcprep.paths.make_sure_path_exists(path)
 
   hcp_info = hcprep.info.basics()    

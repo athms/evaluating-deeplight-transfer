@@ -34,17 +34,17 @@ def main():
   ap.add_argument("--verbose", required=False, default=1,
                   help="comment current program steps (0: no or 1: yes) (default: 1)")
   
-  args = vars(ap.parse_args())
-  architecture = str(args['architecture'])
-  pretrained = bool(int(args['pretrained']))
-  task = str(args['task'])
-  subject = str(args['subject'])
-  run = str(args['run'])
-  batch_size = int(args['batch_size'])
-  verbose = bool(int(args['verbose']))
-  data_path = str(args['data'])
-  if args['out'] is not None:
-    out_path = str(args['out'])
+  args = ap.parse_args()
+  architecture = str(args.architecture)
+  pretrained = bool(int(args.pretrained))
+  task = str(args.task)
+  subject = str(args.subject)
+  run = str(args.run)
+  batch_size = int(args.batch_size)
+  verbose = bool(int(args.verbose))
+  data_path = str(args.data)
+  if args.out is not None:
+    out_path = str(args.out)
     print('Path: {}'.format(out_path))
   else:
     out_path = '../results/predictions/DeepLight/{}/pretrained-{}/'.format(architecture, pretrained)
