@@ -20,7 +20,7 @@ def path_bids_EV(subject, task, run, path):
         runs: String ID of HCP run (one of ["LR", "RL"])
         path: Path to local BIDS directory.
     """
-    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_EV_summary.csv".format(subject, task, run))
+    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_desc-EV_summary.csv".format(subject, task, run))
 
 
 def path_bids_func_mni(subject, task, run, path):
@@ -33,7 +33,7 @@ def path_bids_func_mni(subject, task, run, path):
         runs: String ID of HCP run (one of ["LR", "RL"])
         path: Path to local BIDS directory.
     """
-    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-preproc_bold.nii.gz".format(subject, task, run))
+    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz".format(subject, task, run))
 
 
 def path_bids_anat_mni(subject, task, run, path):
@@ -45,7 +45,7 @@ def path_bids_anat_mni(subject, task, run, path):
         task: String ID of HCP task.
         path: Path to local BIDS directory.
     """
-    return os.path.join(path, "sub-{}".format(subject), "anat", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-preproc_T1w.nii.gz".format(subject, task, run))
+    return os.path.join(path, "sub-{}".format(subject), "anat", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-preproc_T1w.nii.gz".format(subject, task, run))
 
 
 def path_bids_func_mask_mni(subject, task, run, path):
@@ -58,7 +58,7 @@ def path_bids_func_mask_mni(subject, task, run, path):
         runs: String ID of HCP run (one of ["LR", "RL"])
         path: Path to local BIDS directory.
     """
-    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-preproc_brainmask.nii.gz".format(subject, task, run))
+    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-preproc_brain_mask.nii.gz".format(subject, task, run))
 
 
 
@@ -72,4 +72,4 @@ def path_bids_tfr(subject, task, run, path):
         runs: String ID of HCP run (one of ["LR", "RL"])
         path: Path to local BIDS directory.
     """
-    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_desc-tfr.tfrecords".format(subject, task, run))
+    return os.path.join(path, "sub-{}".format(subject), "func", "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-tfr.tfrecords".format(subject, task, run))
