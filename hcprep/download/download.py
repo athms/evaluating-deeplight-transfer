@@ -53,8 +53,8 @@ def retrieve_subject_ids(ACCESS_KEY, SECRET_KEY, task, runs=['LR', 'RL'], n=1000
     for o in bucket.objects.filter(Prefix='HCP'):
         if (sample_key in o.key):
             subject = o.key.split('/')[1]
-            if check_subject_data_present(bucket, subject, task, runs):
-                if subject not in subject_ids:
+            if (check_subject_data_present(bucket, subject, task, runs)
+                and subject not in subject_ids):
                     subject_ids.append(subject)
         if len(subject_ids) >= n:
             break
@@ -75,6 +75,7 @@ def check_subject_data_present(bucket, subject, task, runs):
     Returns:
         Bool indicating whether task-fMRI data present.
     """
+    anat_key = ('T1w.nii.gz')
     checks = []
     for run in runs:
         prefix = 'HCP/{}/MNINonLinear/Results/tfMRI_{}_{}/'.format(
@@ -89,7 +90,6 @@ def check_subject_data_present(bucket, subject, task, runs):
 
         # anatomical scan
         anat_prefix = 'HCP/{}/MNINonLinear/'.format(subject)
-        anat_key = ('T1w.nii.gz')
         checks.append(_check_key_exists(anat_key, bucket, anat_prefix))
 
         # EV data
@@ -97,11 +97,8 @@ def check_subject_data_present(bucket, subject, task, runs):
             EV_key = (prefix+'EVs/'+EV_file)
             checks.append(_check_key_exists(EV_key, bucket, prefix))
 
-    if np.sum(checks) == len(checks):
-        return True
-    else:
-        return False
-
+    return np.sum(checks) == len(checks)
+    
 
 def download_file_from_bucket(bucket, bucket_id, output_file):
     """Download the a file (as specified by bucket_id)
@@ -114,9 +111,8 @@ def download_file_from_bucket(bucket, bucket_id, output_file):
     """
     if not os.path.isfile(output_file):
         try:
-            print('trying to download {}  to  {}'.format(bucket_id, output_file))
+            print('downloading {}  to  {}'.format(bucket_id, output_file))
             bucket.download_file(bucket_id, output_file)
-            print('done.')
         except botocore.exceptions.ClientError as e:
             # If a client error is thrown, then check that it was a 404 error.
             # If it was a 404 error, then the bucket id does not exist.
@@ -182,7 +178,7 @@ def download_subject_data(ACCESS_KEY, SECRET_KEY, subject, task, run, output_pat
                   'EVs/')
     for EV_file in _return_hcp_EV_file_ids(task):
         bucket_id = identifier+EV_file
-        output_file = path_func+'sub-{}_task-{}_run-{}_EV-{}'.format(
+        output_file = path_func+'sub-{}_task-{}_run-{}_desc-EV_{}'.format(
             subject, task, run, EV_file)
         download_file_from_bucket(bucket, bucket_id, output_file)
 
@@ -193,7 +189,6 @@ def download_subject_data(ACCESS_KEY, SECRET_KEY, subject, task, run, output_pat
         EV_summary = summarize_subject_EVs(task, subject, [run], path_func)
         if EV_summary is not None:
             EV_summary.to_csv(output_file, index=False)
-            print('done.')
         else:
             print('! no EV files found for sub-{}, task-{}, run-{}'.format(
                 subject, task, run))
