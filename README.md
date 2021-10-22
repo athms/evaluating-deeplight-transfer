@@ -1,14 +1,14 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
 This README file contains the following sections:
-1. [Purpose of this project](#Purpose-of-this-project)
-2. [Project organization](#Project-organization)
-3. [Installation](#Installation)
-4. [Packages](#Packages)
-5. [Usage](#Usage)
+- [Purpose of this project](#Purpose-of-this-project)
+- [Project organization](#Project-organization)
+- [Installation](#Installation)
+- [Packages](#Packages)
+- [Usage](#Usage)
 
 
-## Purpose of this project
+## What is the purpose of this repository?
 
 This repository contains three python packages, which are written for Python 3.6 (see [src/](src/)): 
 - `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services).
@@ -16,7 +16,7 @@ This repository contains three python packages, which are written for Python 3.6
 - `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
-## Project organization
+## Repository organization
 
 ```bash
 ├── poetry.lock         <- Details of used package versions
