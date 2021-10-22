@@ -1,19 +1,62 @@
 #!/usr/bin/env python
 import numpy as np
+from keras.models import Sequential
+from typing import Tuple
 
 
-def _init_model(
+def with_keras(func):
+  def wrapper(*args, **kwargs):
+    import keras
+    return func(
+      keras=keras,
+      *args,
+      **kwargs
+    )
+  return wrapper
+
+def with_tf_keras(func):
+  def wrapper(*args, **kwargs):
+    from tensorflow import keras
+    return func(
+      keras=keras,
+      *args,
+      **kwargs
+    )
+  return wrapper
+
+@with_keras
+def make_keras_architecture(
+  *args,
+  **kwargs
+  ) -> Sequential:
+  return make_architecture(
+    *args,
+    **kwargs
+  )
+
+@with_tf_keras
+def make_tf_architecture(
+  *args,
+  **kwargs
+  ) -> Sequential:
+  return make_architecture(
+    *args,
+    **kwargs
+  )
+
+def make_architecture(
   keras,
-  input_shape: int,
+  input_shape: Tuple[int, int, int],
   n_classes: int,
   batch_size: int,
-  return_logits: bool = True):
+  return_logits: bool = True
+  ) -> Sequential:
   """Setup 3D-DeepLight architecture,
   as specified in Thomas et al., 2021"""
   
   model = keras.models.Sequential()
 
-  model.add(keras.layers.InputLayer(input_shape=input_shape))
+  model.add(keras.layers.InputLayer(input_shape=[*input_shape, 1]))
 
 
   model.add(
