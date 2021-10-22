@@ -1,8 +1,8 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
 This README file contains the following sections:
-- [Purpose of this project](#Purpose-of-this-project)
-- [Project organization](#Project-organization)
+- [What is the purpose of this project](#What-is-the-purpose-of-this-repository?)
+- [Repository organization](#Repository-organization)
 - [Installation](#Installation)
 - [Packages](#Packages)
 - [Usage](#Usage)
