@@ -21,35 +21,87 @@ def main():
   args = ap.parse_args()
   path = str(args.path)
   
-  subjects = [int(f.split('sub-')[1]) for f in os.listdir(path) if 'sub' in f]
+  subjects = [
+    int(f.split('sub-')[1])
+    for f in os.listdir(path)
+    if 'sub' in f
+  ]
 
   hcp_info = hcprep.info.basics()
 
-  print('Processing {} subjects with {} runs per task.\n'.format(
+  print(
+    'Processing {} subjects with {} runs per task.\n'.format(
     len(subjects),
     len(hcp_info.runs))
   )
   for subject_id, subject in enumerate(subjects):
-    print('Processing subject: {}/{}'.format(subject_id+1, len(subjects)))
+    print(
+      'Processing subject: {}/{}'.format(
+        subject_id+1, len(subjects)
+      )
+    )
     for task_id, task in enumerate(hcp_info.tasks):
       for run_id, run in enumerate(hcp_info.runs):
 
-        if not np.all([
-          os.path.isfile( hcprep.paths.path_bids_func_mni(subject, task, run, path) ),
-          os.path.isfile( hcprep.paths.path_bids_func_mask_mni(subject, task, run, path) ),
-          os.path.isfile( hcprep.paths.path_bids_EV(subject, task, run, path) )
-          ]):
-          print('Skipping subejct {} task {} run {},"\
-            "because BIDS data not fully present.'.format(subject, task, run))
+        filechecks = [
+          os.path.isfile(
+            hcprep.paths.path_bids_func_mni(
+              subject=subject,
+              task=task,
+              run=run,
+              path=path
+            )
+          ),
+          os.path.isfile( 
+            hcprep.paths.path_bids_func_mask_mni(
+              subject=subject,
+              task=task,
+              run=run,
+              path=path
+            )
+          ),
+          os.path.isfile(
+            hcprep.paths.path_bids_EV(
+              subject=subject,
+              task=task,
+              run=run,
+              path=path
+            )
+          )
+        ]
+        if not np.all(filechecks):
+          print(
+            'Skipping subejct {} task {} run {},"\
+            "because BIDS data not fully present.'.format(
+              subject, task, run
+            )
+          )
         else:
-          subject_data = hcprep.data.load_subject_data(task, subject, [run], path, hcp_info.t_r)
+          subject_data = hcprep.data.load_subject_data(
+            task=task,
+            subject=subject,
+            runs=[run],
+            path=path,
+            t_r=hcp_info.t_r
+          )
           
           func_imgs, states, trs = hcprep.preprocess.preprocess_subject_data(
-            subject_data=subject_data, runs=[run],
-            high_pass=1./128., smoothing_fwhm=3
+            subject_data=subject_data,
+            runs=[run],
+            high_pass=1./128.,
+            smoothing_fwhm=3
           )
 
-          tfr_writers = [ tf.io.TFRecordWriter( hcprep.paths.path_bids_tfr(subject, task, run, path) ) ]
+          tfr_writers = [
+            tf.io.TFRecordWriter(
+              hcprep.paths.path_bids_tfr(
+                subject=subject,
+                task=task,
+                run=run,
+                path=path
+              )
+            )
+          ]
           
           deeplight.data.io.write_func_to_tfr(
             tfr_writers=tfr_writers,

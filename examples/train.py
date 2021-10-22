@@ -103,7 +103,9 @@ def main():
   if args.out is None:
     out_path = '../results/models/DeepLight/{}/pretrained-{}/'.format(
       architecture, pretrained)
-    print('"out" not defined. Defaulting to: {}'.format(out_path))    
+    print(
+      '"out" not defined. Defaulting to: {}'.format(out_path)
+    )    
   else:
     out_path = str(args.out)
 
@@ -113,26 +115,54 @@ def main():
   training_tasks = np.unique(training_tasks)
   for task in training_tasks:
     if task not in hcp_info.tasks:
-      raise ValueError('{} not in {}'.format(task, hcp_info.tasks))
+      raise ValueError(
+        '{} not in {}'.format(task, hcp_info.tasks)
+      )
 
   os.makedirs(out_path, exist_ok=True)
 
-  print("\nTraining settings:")
-  print("\tHCP tasks: {}".format(training_tasks))
-  print("\tLearning rate: {}".format(learning_rate))
-  print('\tBatch size: {}'.format(batch_size))
-  print("\tEpochs: {}".format(epochs))
-  print("\tTraining steps per epoch: {}".format(training_steps))
-  print("\tValidation steps per epoch: {}".format(validation_steps))
-  print('\tSaving results to: {}'.format(out_path))
+  print(
+    "\nTraining settings:"
+  )
+  print(
+    "\tHCP tasks: {}".format(training_tasks)
+  )
+  print(
+    "\tLearning rate: {}".format(learning_rate)
+  )
+  print(
+    '\tBatch size: {}'.format(batch_size)
+  )
+  print(
+    "\tEpochs: {}".format(epochs)
+  )
+  print(
+    "\tTraining steps per epoch: {}".format(training_steps)
+  )
+  print(
+    "\tValidation steps per epoch: {}".format(validation_steps)
+  )
+  print(
+    '\tSaving results to: {}'.format(out_path)
+  )
   
   # how many cognitive states are there in the training data?
   n_states_training = np.sum(
-    [hcp_info.n_states_per_task[task] for task in training_tasks]
+    [
+      hcp_info.n_states_per_task[task]
+      for task in training_tasks
+    ]
   )
   
-  subjects = np.sort(np.unique([ int(p.split('sub-')[1])
-    for p in os.listdir(data_path) if p.startswith('sub-') ]))
+  subjects = np.sort(
+    np.unique(
+      [
+        int(p.split('sub-')[1])
+        for p in os.listdir(data_path)
+        if p.startswith('sub-')
+      ]
+    )
+  )
 
   # assign subjects to training / validation data (2 / 1 split)
   subjects_training = np.random.choice(
@@ -141,23 +171,43 @@ def main():
     replace=False
   )
   subjects_validation = np.array(
-    [s for s in subjects if s not in subjects_training]
+    [
+      s for s in subjects
+      if s not in subjects_training
+    ]
   )
-  print('\nRandom subject split: ')
-  print('\t{} training subjects, {} validation subjects'.format(
-    len(subjects_training), len(subjects_validation)))
-  print('\tSaving subject assignment to: {}'.format(
-    out_path+'subject_split.npy'))
-  np.save(out_path+'subject_split.npy',
-    {'training': subjects_training,
-    'validation': subjects_validation})
+  print(
+    '\nRandom subject split: '
+  )
+  print(
+    '\t{} training subjects, {} validation subjects'.format(
+    len(subjects_training), len(subjects_validation)
+    )
+  )
+  print(
+    '\tSaving subject assignment to: {}'.format(
+    out_path+'subject_split.npy'
+    )
+  )
+  np.save(
+    out_path+'subject_split.npy',
+    {
+     'training': subjects_training,
+     'validation': subjects_validation
+    }
+  )
 
   # get paths to training TFR files
   train_files = []
   for task in training_tasks:
     for subject in subjects_training:
       for run in hcp_info.runs:
-        filepath = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
+        filepath = hcprep.paths.path_bids_tfr(
+          subject=subject,
+          task=task,
+          run=run,
+          path=data_path
+        )
         if os.path.isfile(filepath):
           train_files.append(filepath)
   
@@ -166,7 +216,12 @@ def main():
   for task in training_tasks:
     for subject in subjects_validation:
       for run in hcp_info.runs:
-        filepath = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
+        filepath = hcprep.paths.path_bids_tfr(
+          subject=subject,
+          task=task,
+          run=run,
+          path=data_path
+        )
         if os.path.isfile(filepath):
           validation_files.append(filepath)
 
@@ -185,14 +240,25 @@ def main():
       verbose=verbose
     )
   else:
-    raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
+    raise ValueError(
+      'Invalid value for DeepLight architecture. Must be 2D or 3D.'
+    )
 
   fit_history = deeplight_variant.fit(
     train_files=train_files,
     validation_files=validation_files,
-    n_onehot=20, # there are 20 values in the onehot encoding of the HCP TFR files (one for each of the 20 cognitive states of the HCP data)
-    # of these 20 onehot values we only care about those belonging to the current training task:
-    onehot_idx=np.sort(np.concatenate([hcp_info.onehot_idx_per_task[t] for t in training_tasks])), 
+    n_onehot=20, # there are 20 values in the onehot encoding of the HCP TFR files
+    # (one for each of the 20 cognitive states of the HCP data)
+    # of these 20 onehot values we only care about those 
+    # that belong to the current training task:
+    onehot_idx=np.sort(
+      np.concatenate(
+        [
+          hcp_info.onehot_idx_per_task[t]
+          for t in training_tasks
+        ]
+      )
+    ), 
     learning_rate=learning_rate,
     epochs=epochs,
     training_steps=training_steps,

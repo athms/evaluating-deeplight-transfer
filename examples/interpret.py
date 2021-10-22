@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from nilearn import datasets, surface, plotting, image, masking
+from nilearn import plotting, image, masking
 import deeplight
 import hcprep
 
@@ -75,27 +75,49 @@ def main():
   data_path = str(args.data)
   if args.out is not None:
     out_path = str(args.out)
-    print('Path: {}'.format(out_path))
+    print(
+      'Path: {}'.format(out_path)
+    )
   else:
     out_path = '../results/relevances/DeepLight/{}/brainmaps/'.format(
       architecture)
-    print('"out" not defined. Defaulting to: {}'.format(out_path))
+    print(
+      '"out" not defined. Defaulting to: {}'.format(
+        out_path
+      )
+    )
 
   hcp_info = hcprep.info.basics()
 
   sub_out_path = out_path+'sub-{}/'.format(subject)
   os.makedirs(sub_out_path, exist_ok=True)
   if verbose:
-    print('\nSaving results to: {}'.format(sub_out_path))
+    print(
+      '\nSaving results to: {}'.format(sub_out_path)
+    )
 
   sub_bold_img = image.load_img(
-    hcprep.paths.path_bids_func_mni(subject, task, run, data_path)
+    hcprep.paths.path_bids_func_mni(
+      subject=subject,
+      task=task,
+      run=run,
+      path=data_path
+    )
   )
   sub_bold_mask = image.load_img(
-    hcprep.paths.path_bids_func_mask_mni(subject, task, run, data_path)
+    hcprep.paths.path_bids_func_mask_mni(
+      subject=subject,
+      task=task,
+      run=run,
+      path=data_path
+    )
   )
-
-  tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
+  tfr_file = hcprep.paths.path_bids_tfr(
+    subject=subject,
+    task=task,
+    run=run,
+    path=data_path
+  )
 
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
@@ -126,8 +148,10 @@ def main():
       verbose=verbose
     )
   else:
-      raise ValueError('Invalid value for DeepLight architecture."\
-        "Must be 2D or 3D.')
+      raise ValueError(
+        "Invalid value for DeepLight architecture."\
+        "Must be 2D or 3D."
+      )
 
   # we need to setup the LRP copmutation before calling .interpret
   deeplight_variant.setup_lrp()
@@ -136,8 +160,12 @@ def main():
   sess.run(iterator.initializer)
 
   if verbose:
-    print('\nInterpreting predictions for task:"\
-      "{}, subject: {}, run: {}'.format(task, subject, run))
+    print(
+      '\nInterpreting predictions for task:"\
+      "{}, subject: {}, run: {}'.format(
+        task, subject, run
+      )
+    )
   states = []
   relevances = []
   trs = []
@@ -145,15 +173,25 @@ def main():
   n = 0
   while True:
     try:
-      (batch_volume,
-       batch_trs,
-       batch_state,
-       batch_onehot) = sess.run([iterator_features['volume'],
-                                 iterator_features['tr'],
-                                 iterator_features['state'],
-                                 iterator_features['onehot']])
-      batch_pred = deeplight_variant.decode(batch_volume)
-      batch_relevances = deeplight_variant.interpret(batch_volume) 
+      (
+        batch_volume,
+        batch_trs,
+        batch_state,
+        batch_onehot
+      ) = sess.run(
+         [
+           iterator_features['volume'],
+           iterator_features['tr'],
+           iterator_features['state'],
+           iterator_features['onehot']
+        ]
+      )
+      batch_pred = deeplight_variant.decode(
+        volume=batch_volume
+      )
+      batch_relevances = deeplight_variant.interpret(
+        volume=batch_volume
+      ) 
       for i in range(batch_state.shape[0]):
         relevances.append(batch_relevances[i])
         states.append(batch_state[i])
@@ -161,8 +199,11 @@ def main():
         acc += np.sum(batch_pred[i].argmax() == batch_onehot[i].argmax())
         n += 1
         if verbose and (n%10) == 0:
-          print('\tDecoding accuracy after {} batches: {} %'.format(
-            n, (acc/n)*100))
+          print(
+            '\tDecoding accuracy after {} batches: {} %'.format(
+              n, (acc/n)*100
+            )
+          )
     except tf.errors.OutOfRangeError:
       break
   if verbose:
@@ -171,7 +212,10 @@ def main():
   trs = np.concatenate(trs)
   states = np.concatenate(states)
   relevances = np.concatenate(
-    [np.expand_dims(r, -1) for r in relevances],
+    [
+      np.expand_dims(r, -1)
+      for r in relevances
+    ],
     axis=-1
   )
 
@@ -180,32 +224,50 @@ def main():
   relevances = relevances[...,tr_idx]
   states = states[tr_idx]
 
-  sub_relevance_img = image.new_img_like(sub_bold_img, relevances)  
+  sub_relevance_img = image.new_img_like(
+    ref_niimg=sub_bold_img,
+    data=relevances
+  )  
   sub_relevance_img.to_filename(
     sub_out_path+'sub-{}_task-{}_run-{}_desc-relevances.nii.gz'.format(
       subject, task, run))
 
   if verbose:
-      print('\nPlotting brainmaps to: {}'.format(sub_out_path))
+      print(
+        '\nPlotting brainmaps to: {}'.format(sub_out_path)
+      )
   for si, state in enumerate(hcp_info.states_per_task[task]):
       
       # subset imgs to cognitive state
-      state_relevance_img = image.index_img(sub_relevance_img, states==si)
-      state_relevance_img = image.smooth_img(state_relevance_img, fwhm=6)
-      mean_state_relevance_img = image.mean_img(state_relevance_img)
+      state_relevance_img = image.index_img(
+        imgs=sub_relevance_img,
+        index=states==si
+      )
+      state_relevance_img = image.smooth_img(
+        imgs=state_relevance_img,
+        fwhm=6
+      )
+      mean_state_relevance_img = image.mean_img(
+        imgs=state_relevance_img
+      )
       mean_state_relevance_img.to_filename(
         sub_out_path+'sub-{}_task-{}_run-{}_desc-{}_avg_relevances.nii.gz'.format(
-          subject, task, run, state))
+          subject, task, run, state
+        )
+      )
       
       # 95 percentile threshold for plotting
       threshold = np.percentile(
-        masking.apply_mask(mean_state_relevance_img, sub_bold_mask),
+        masking.apply_mask(
+          imgs=mean_state_relevance_img,
+          mask_img=sub_bold_mask
+        ),
         95
       )
       
       # surface
       plotting.plot_img_on_surf(
-        mean_state_relevance_img,
+        stat_map=mean_state_relevance_img,
         views=['lateral', 'medial', 'ventral'],
         hemispheres=['left', 'right'],
         title='State: {}'.format(state),
@@ -220,7 +282,7 @@ def main():
       
       # axial slices
       plotting.plot_stat_map(
-        mean_state_relevance_img,
+        stat_map=mean_state_relevance_img,
         display_mode='z',
         cut_coords=30,
         cmap=plt.cm.seismic,

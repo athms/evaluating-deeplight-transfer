@@ -72,11 +72,15 @@ def main():
   data_path = str(args.data)
   if args.out is not None:
     out_path = str(args.out)
-    print('Path: {}'.format(out_path))
+    print(
+      'Path: {}'.format(out_path)
+    )
   else:
     out_path = '../results/predictions/DeepLight/{}/pretrained-{}/'.format(
       architecture, pretrained)
-    print('"out" not defined. Defaulting to: {}'.format(out_path))
+    print(
+      '"out" not defined. Defaulting to: {}'.format(out_path)
+    )
 
   # make sure task specification is valid
   assert task in [
@@ -88,14 +92,19 @@ def main():
     'RELATIONAL'],\
     'Invalid task; only pre-training tasks valid (all HCP tasks, except for WM)!'
 
-  hcp_info = hcprep.info.basics()
-
   sub_out_path = out_path+'sub-{}/'.format(subject)
   os.makedirs(sub_out_path, exist_ok=True)
   if verbose:
-    print('\nSaving predictions to: {}'.format(sub_out_path))
+    print(
+      '\nSaving predictions to: {}'.format(sub_out_path)
+    )
 
-  tfr_file = hcprep.paths.path_bids_tfr(subject, task, run, data_path)
+  tfr_file = hcprep.paths.path_bids_tfr(
+    subject=subject,
+    task=task,
+    run=run,
+    path=data_path
+  )
 
   dataset = deeplight.data.io.make_dataset(
     files=[tfr_file],
@@ -126,44 +135,62 @@ def main():
       verbose=verbose
     )
   else:
-      raise ValueError('Invalid value for DeepLight architecture. Must be 2D or 3D.')
+      raise ValueError(
+        'Invalid value for DeepLight architecture.'\
+        'Must be 2D or 3D.'
+      )
 
   sess = tf.Session()
   sess.run(iterator.initializer)
 
-  print('\nPredicting for subject {} in run {} of task {}'.format(subject, run, task))
+  print(
+    '\nPredicting for subject {} in run {} of task {}'.format(
+      subject, run, task
+    )
+  )
   i, acc = 1, 0
   predictions = [] 
   while True:
     try:
       tr, onehot, volume = sess.run(
-        (iterator_features['tr'],
-         iterator_features['onehot'],
-         iterator_features['volume']))
-      pred = deeplight_variant.decode(volume)
+        (
+          iterator_features['tr'],
+          iterator_features['onehot'],
+          iterator_features['volume']
+        )
+      )
+      pred = deeplight_variant.decode(
+        volume=volume
+      )
       for ii in range(tr.shape[0]):
           predictions.append(
             pd.DataFrame(
-              {'subject': subject,
-              'task': task,
-              'run': run,
-              'tr': tr[ii],
-              'true_state': onehot[ii].argmax(),
-              'pred_state': pred[ii].argmax()},
+              {
+                'subject': subject,
+                'task': task,
+                'run': run,
+                'tr': tr[ii],
+                'true_state': onehot[ii].argmax(),
+                'pred_state': pred[ii].argmax()
+              },
               index=[i]
             )
           )
           acc += (onehot[ii].argmax() == pred[ii].argmax())
           if verbose and (i%10) == 0:
-            print('\tBatch: {}; acc: {} %'.format(i, (acc/i)*100))
+            print(
+              '\tBatch: {}; acc: {} %'.format(i, (acc/i)*100)
+            )
           i += 1
     except tf.errors.OutOfRangeError:
       break
     except ValueError:
       break
   predictions = pd.concat(predictions)
-  print('Total decoding accuracy: {} %'.format(
-    np.mean(predictions['true_state']==predictions['pred_state']) * 100)
+  print(
+    'Total decoding accuracy: {} %'.format(
+      np.mean(predictions['true_state']==predictions['pred_state']) * 100
+    )
   )
   predictions.to_csv(
     sub_out_path+'task-{}_sub-{}_run-{}_desc-predictions_{}-DeepLight_pretrained-{}.csv'.format(

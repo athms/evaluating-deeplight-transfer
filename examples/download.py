@@ -42,7 +42,11 @@ def main():
 
   hcp_info = hcprep.info.basics()    
 
-  print('Downloading data of {} subjects to {}'.format(n, path))
+  print(
+    'Downloading data of {} subjects to {}'.format(
+      n, path
+    )
+  )
   for task in hcp_info.tasks:
     for subject in hcp_info.subjects[task][:n]:
       for run in hcp_info.runs:
