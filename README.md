@@ -1,12 +1,22 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
+This README file contains the following sections:
+1. [Purpose of this project](#Purpose-of-this-project)
+2. [Project organization](#Project-organization)
+3. [Installation](#Installation)
+4. [Packages](#Packages)
+5. [Usage](#Usage)
+
+
+## Purpose of this project
+
 This repository contains three python packages, which are written for Python 3.6 (see [src/](src/)): 
 - `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services).
 - `deeplight` is a simple python package that allows to easily apply two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below) to whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
 - `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
-## 0. Project organization
+## Project organization
 
 ```bash
 ├── poetry.lock         <- Details of used package versions
@@ -32,7 +42,7 @@ This repository contains three python packages, which are written for Python 3.6
 ```
 
 
-## 1. Install
+## Installation
 `deeplight` and `hcprep` are written for Python 3.6 and require a working Python environment running on your computer ([pyenv](https://github.com/pyenv/pyenv) is recommended for Python version management).
 
 Clone and switch to this repository:
@@ -53,7 +63,9 @@ poetry run pip3 install -e .
 ```
 
 
-## 2. HCPrep
+## Packages
+
+### HCPrep
 `hcprep` stores data locally in the [Brain Imaging Data Structure](https://bids.neuroimaging.io) (BIDS) format.
 
 To make the fMRI data usable for DL analyses with TensorFlow, `hcprep` can clean the downloaded fMRI data and store these in the [TFRecords data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).  
@@ -95,7 +107,7 @@ hcp_info = hcprep.info.basics()
 For further details on the experimental tasks and their cognitive states, [click here](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub).
 
 
-## 3. DeepLight
+### DeepLight
 `deeplight` implements two DeepLight architectures ("2D" and "3D"), which can be accessed as `deeplight.two` (2D) and `deeplight.three` (3D).
 
 Importantly, both DeepLight architectures operate on the level of individual whole-brain fMRI volumes (e.g., individual TRs).
@@ -113,7 +125,7 @@ For further methdological details regarding the two DeepLight architectures, see
 **Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to a high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
 
 
-## 4. Example scripts
+## Usage
 You can find a set of example python scripts in [scripts/](scripts/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures implemented in `deeplight`.
 
 You can run individual scripts in your `poetry`environment with: 
@@ -121,4 +133,3 @@ You can run individual scripts in your `poetry`environment with:
 cd scripts/
 poetry run python <SCRIPT NAME>
 ```
-
