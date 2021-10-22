@@ -5,7 +5,7 @@ This README file contains the following sections:
 - [Repository organization](#Repository-organization)
 - [Installation](#Installation)
 - [Packages](#Packages)
-    - [HCPprep](#HCPrep)
+    - [HCPrep](#HCPrep)
     - [DeepLight](#DeepLight)
 - [Basic usage](#Basic-usage)
 
