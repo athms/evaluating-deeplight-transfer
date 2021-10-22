@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import os
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
 import tensorflow as tf
 import warnings
 from einops import rearrange
-from ._architecture import _init_model
-from ._fit import _fit
+from typing import Tuple
+from ._architecture import make_architecture
 import deeplight
 
 
@@ -18,7 +20,8 @@ class model(object):
     return_logits: bool = True,
     verbose: bool = True,
     name: str = '2D',
-    input_shape: int = (91, 109, 91)) -> None:
+    input_shape: Tuple[int, int, int] = (91, 109, 91)
+    ) -> None:
     """A basic implementation of the 2D-DeepLight architecture
     as published in Thomas et al., 2021.
 
@@ -56,7 +59,7 @@ class model(object):
     self.sess = tf.Session()
 
     with tf.variable_scope('model'):
-      self.model = _init_model(
+      self.model = make_architecture(
           input_shape=self.input_shape,
           n_classes=self.n_states,
           batch_size=self.batch_size,
@@ -174,22 +177,134 @@ class model(object):
         DataFrame: Training history.
     """
     os.makedirs(output_path, exist_ok=True)
-    return _fit(
-      self,
-      train_files=train_files,
-      validation_files=validation_files,
+
+    files = tf.placeholder(tf.string, shape=[None])
+    dataset = deeplight.data.io.make_dataset(
+      files=files,
+      batch_size=self.batch_size,
+      nx=self.input_shape[0],
+      ny=self.input_shape[1],
+      nz=self.input_shape[2],
+      shuffle=True,
+      only_parse_XY=True,
+      transpose_xyz=True,
+      add_channel_dim=True,
       n_onehot=n_onehot,
       onehot_idx=onehot_idx,
-      learning_rate=learning_rate,
-      batch_size=self.batch_size,
-      epochs=epochs,
-      training_steps=training_steps,
-      validation_steps=validation_steps,
-      output_path=output_path,
-      verbose=self.verbose,
       shuffle_buffer_size=shuffle_buffer_size,
-      n_workers=n_workers
+      n_workers=n_workers)
+
+    iterator = dataset.make_initializable_iterator()
+    volume, onehot = iterator.get_next()
+    # TODO: avoid hardcoding reshape
+    volume = tf.reshape(
+      volume,
+      [self.batch_size*self.input_shape[2],
+       self.input_shape[1],
+       self.input_shape[0],
+       1]
     )
+
+    with tf.variable_scope('model', reuse=tf.AUTO_REUSE): 
+      logits = self.model.forward(volume)
+
+    with tf.variable_scope('backward'):
+      self._xentropy = tf.nn.softmax_cross_entropy_with_logits_v2(
+        logits=logits,
+        labels=onehot)
+      self._avg_xentropy = tf.reduce_mean(self._xentropy)
+      optimizer = tf.train.AdamOptimizer(learning_rate)
+      self._optimizer_step = optimizer.minimize(self._avg_xentropy)
+
+    with tf.variable_scope('metrics'):
+      pred = tf.argmax(logits, axis=1)
+      state = tf.argmax(onehot, axis=1)
+      self._accuracy = tf.reduce_mean(
+        tf.cast(tf.equal(pred, state), tf.float32)
+      )
+
+    self.sess.run(tf.global_variables_initializer()) 
+
+    if self.pretrained:
+      self.load_weights(self._path_pretrained_tvars, verbose=False)
+
+    history = []
+    for epoch in range(1, epochs+1):
+      print('\n\nTraining epoch: {}'.format(epoch))
+    
+      np.random.shuffle(train_files)
+      self.sess.run(iterator.initializer, feed_dict={files: train_files})
+      xe_train, acc_train = self._train_loop(n_steps=training_steps)
+      
+      self.sess.run(iterator.initializer, feed_dict={files: validation_files})
+      xe_val, acc_val = self._val_loop(n_steps=validation_steps)
+
+      history.append(
+        pd.DataFrame(
+          {
+          'epoch': epoch,
+          'accuracy': acc_train,
+          'loss': xe_train,
+          'val_accuracy': acc_val,
+          'val_loss': xe_val
+          }, 
+          index=np.array([epoch-1])
+        )
+      )
+      pd.concat(history).to_csv(output_path+'history.csv')
+
+      self.save_weights(path=output_path+"epoch-{:03d}.npy".format(epoch))
+
+    return pd.concat(history)
+
+  def _train_loop(self, n_steps):
+    """Perform a training loop for n_steps
+    """
+    xe, acc = 0, 0
+    with tqdm(total=n_steps) as pbar:
+      for step in range(1,n_steps+1):
+        try:
+          _, batch_acc, batch_xe = self.sess.run(
+            [self._optimizer_step, self._accuracy, self._avg_xentropy],
+            feed_dict={self._keep_prob: 0.5,
+                       self._conv_keep_probs: np.array([1, .8, .6])
+            }
+          )
+          xe += batch_xe
+          acc += batch_acc
+          pbar.set_description(
+              "loss: {:02f} - acc: {:02f}".format(
+                  xe/float(step), acc/float(step)),
+              refresh=True)
+          pbar.update()
+        except tf.errors.DataLossError:
+          continue
+        except (tf.errors.OutOfRangeError, tf.errors.InvalidArgumentError):
+          break
+    return xe / float(step), acc / float(step)
+
+  def _val_loop(self, n_steps):
+    """Perform a validation loop for n_steps (no weight updates!)
+    """
+    xe, acc = 0, 0
+    for step in range(1,n_steps+1):
+      try:
+        batch_acc, batch_xe = self.sess.run(
+          [self._accuracy, self._avg_xentropy],
+          feed_dict={self._keep_prob: 1,
+                     self._conv_keep_probs: np.ones(3)
+                     }
+        )
+        xe += batch_xe
+        acc += batch_acc
+      except tf.errors.DataLossError:
+        continue
+      except (tf.errors.OutOfRangeError, tf.errors.InvalidArgumentError):
+        break
+    if self.verbose:
+      print('Val. data: acc: {:02f} - loss: {:02f}'.format(
+        acc/float(step), xe/float(step)))
+    return xe / float(step), acc / float(step)
 
   def setup_lrp(self):
     """Setup LRP computation, as specified in Thomas et al., 2021.

@@ -3,24 +3,26 @@ import os
 import numpy as np
 import warnings
 import tensorflow as tf
-import keras
 import innvestigate
 from einops import rearrange
-from ._architecture import _init_model
-from ._fit import _fit
+from typing import Tuple
+from ._architecture import make_keras_architecture, make_tf_architecture
+from ._fit import _make_callbacks
 import deeplight
 
 
 class model(object):
   """3D-DeepLight"""
-  def __init__(self,
+  def __init__(
+    self,
     n_states: int = 16,
     pretrained: bool = True,
     batch_size: int = 32,
     return_logits: bool = True,
     verbose: bool = True,
     name: str = '3D',
-    input_shape: int = (91, 109, 91, 1)) -> None:
+    input_shape:  Tuple[int, int, int] = (91, 109, 91)
+    ) -> None:
     """A basic implementation of the 3D-DeepLight architecture
     as published in Thomas et al., 2021.
 
@@ -50,10 +52,11 @@ class model(object):
       print('\tn-states: {}'.format(self.n_states))
       print('\tbatch-size: {}'.format(self.batch_size))
 
-    self.model = _init_model(
-      keras=tf.keras,
-      input_shape=self.input_shape, n_classes=self.n_states,
-      batch_size=self.batch_size, return_logits=self.return_logits
+    self.model = make_tf_architecture(
+      input_shape=self.input_shape,
+      n_classes=self.n_states,
+      batch_size=self.batch_size,
+      return_logits=self.return_logits
     )
 
     if self.pretrained:
@@ -61,7 +64,10 @@ class model(object):
         'three', 'pretrained_model', 'model-3D_DeepLight_desc-pretrained_model.hdf5')
       self.load_weights(self._path_pretrained_weights)
 
-  def load_weights(self, path: str):
+  def load_weights(
+    self,
+    path: str
+    ) -> None:
     """Load model weights from path."""
     stored_model = tf.keras.models.load_model(path)
     for model_layer, stored_model_layer in zip(self.model.layers, stored_model.layers):
@@ -70,20 +76,29 @@ class model(object):
       except:
         print('Cannot load weights for layer {} from {}, as shapes do not match'.format(model_layer.name, path))
 
-  def save_weights(self, path: str):
+  def save_weights(
+    self,
+    path: str
+    ) -> None:
     """Save model weights to path."""
     assert path.endswith('.hdf5'), 'Model needs to be stored in .hdf5 format, but {} was given!'.format(path)
     self.model.save(path)
 
-  def _tranpose_volumes(self, volume):
+  def _tranpose_volumes(
+    self,
+    volume):
     """tranpose (x, y, z) dimensions"""
     return rearrange(volume, 'b x y z c  -> b z y x c')
 
-  def _add_channel_dim(self, volume):
+  def _add_channel_dim(
+    self,
+    volume):
     """add channel dimension to volume"""
     return np.expand_dims(volume, -1)
 
-  def decode(self, volume):
+  def decode(
+    self,
+    volume):
     """Decode cognitive states for volume.
 
     Args:
@@ -96,7 +111,8 @@ class model(object):
     volume = self._tranpose_volumes(volume)
     return self.model.predict(volume)
 
-  def fit(self,
+  def fit(
+    self,
     train_files: str,
     validation_files : str,
     n_onehot: int,
@@ -107,7 +123,8 @@ class model(object):
     validation_steps: int = 1000,
     output_path: str = 'out/',
     shuffle_buffer_size: int = 500,
-    n_workers: int = 4):
+    n_workers: int = 4
+    ) -> tf.keras.callbacks.History:
     """Fit model.
 
     Args:
@@ -135,28 +152,66 @@ class model(object):
     """
     os.makedirs(output_path, exist_ok=True)
 
-    (history, model) = _fit(
-      self,
-      train_files=train_files,
-      validation_files=validation_files,
+    train_dataset = deeplight.data.io.make_dataset(
+      files=train_files,
+      batch_size=self.batch_size,
+      nx=self.input_shape[0],
+      ny=self.input_shape[1],
+      nz=self.input_shape[2],
+      shuffle=True,
+      only_parse_XY=True,
+      transpose_xyz=True,
+      add_channel_dim=True,
+      repeat=True,
       n_onehot=n_onehot,
       onehot_idx=onehot_idx,
-      learning_rate=learning_rate,
-      batch_size=self.batch_size,
-      epochs=epochs,
-      training_steps=training_steps,
-      validation_steps=validation_steps,
-      output_path=output_path,
-      verbose=self.verbose,
       shuffle_buffer_size=shuffle_buffer_size,
       n_workers=n_workers
     )
-
-    self.model = model
+    
+    val_dataset = deeplight.data.io.make_dataset(
+      files=validation_files,
+      batch_size=self.batch_size,
+      nx=self.input_shape[0],
+      ny=self.input_shape[1],
+      nz=self.input_shape[2],
+      shuffle=False,
+      only_parse_XY=True,
+      transpose_xyz=True,
+      add_channel_dim=True,
+      repeat=True,
+      n_onehot=n_onehot,
+      onehot_idx=onehot_idx,
+      shuffle_buffer_size=shuffle_buffer_size,
+      scope_name='validation',
+      n_workers=n_workers
+    )
+    
+    callbacks = _make_callbacks(output_path)
+    
+    self.model.compile(
+      optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
+      loss='categorical_crossentropy',
+      metrics=['accuracy']
+    )
+    
+    if self.verbose:
+      print('Starting training...')
+    history = self.model.fit(
+      train_dataset,
+      epochs=epochs,
+      steps_per_epoch=training_steps,
+      validation_data=val_dataset,
+      validation_steps=validation_steps,
+      callbacks=callbacks,
+      verbose=np.int(self.verbose),
+      use_multiprocessing=n_workers>1,
+      workers=n_workers
+    )
 
     return history
 
-  def setup_lrp(self):
+  def setup_lrp(self) -> None:
     """Setup LRP for 3D-DeepLight."""
     if self.return_logits is False:
       warnings.warning('"'"return_logits"'" should be set to "'"True"'" when computing LRP.')
@@ -165,8 +220,7 @@ class model(object):
       print("\tSetting up LRP analyzer..")
     
     # rebuild model in keras (required for iNNvestigate)
-    analyzer_model = _init_model(
-      keras=keras,
+    analyzer_model = make_keras_architecture(
       input_shape=self.input_shape,
       n_classes=self.n_states,
       batch_size=self.batch_size,
@@ -182,7 +236,9 @@ class model(object):
       epsilon=1e-6
     )
 
-  def interpret(self, volume):
+  def interpret(
+    self,
+    volume):
     """Interpret decoding decision for volume.
 
     Args:
