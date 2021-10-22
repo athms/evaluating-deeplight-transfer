@@ -6,7 +6,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def _feature_extractor(
+def feature_extractor(
   nx: int, ny: int, nz: int,
   batch_size: int,
   conv_keep_probs: float = np.ones(3)):
@@ -125,7 +125,7 @@ def _feature_extractor(
           Dropout(keep_prob=conv_keep_probs[2], noise_shape=[batch_size*nz, 1, 1, 64])]
 
 
-def _lstm_bidirectional(
+def lstm_bidirectional(
   nz: int,
   batch_size: int,
   n_classes: int,
@@ -140,7 +140,7 @@ def _lstm_bidirectional(
           Dropout(keep_prob=keep_prob)]
 
 
-def _output_unit(
+def output_unit(
   n_classes: int,
   return_logits: bool = True):
   """Setup 2D-DeepLight output unit,
@@ -153,7 +153,7 @@ def _output_unit(
 
 
 
-def _init_model(
+def make_architecture(
   input_shape: int,
   n_classes: int,
   batch_size: int,
@@ -164,16 +164,16 @@ def _init_model(
   as specified in Thomas et al., 2021"""
   nz, ny, nx = input_shape
   return modules.Sequential(
-    _feature_extractor(
+    feature_extractor(
       nx=nx, ny=ny, nz=nz,
       batch_size=batch_size,
       conv_keep_probs=conv_keep_probs
       ) +
-    _lstm_bidirectional(
+    lstm_bidirectional(
       nz=nz,
       batch_size=batch_size,
        n_classes=n_classes, keep_prob=keep_prob) +
-    _output_unit(
+    output_unit(
       n_classes=n_classes,
       return_logits=return_logits
     )
