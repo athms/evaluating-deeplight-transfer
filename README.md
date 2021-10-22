@@ -6,13 +6,13 @@ This repository contains three python packages, which are written for Python 3.6
 - `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
-## 0. Project Organization
+## 0. Project organization
 
 ```bash
-├── poetry.lock        <- Details of used package versions
-├── pyproject.toml     <- Lists installed dependencies
-├── README.md          <- This README file
-├── .gitignore         <- Specifies files that .git should ignore
+├── poetry.lock         <- Details of used package versions
+├── pyproject.toml      <- Lists installed dependencies
+├── README.md           <- This README file
+├── .gitignore          <- Specifies files that .git should ignore
 |
 ├── scrips/
 |    ├── decode.py      <- An example of how to decode fMRI data with `deeplight`
@@ -23,12 +23,12 @@ This repository contains three python packages, which are written for Python 3.6
 |
 └── src/
 |    ├── deeplight/
-|    |    └──            <- `deeplight` package
+|    |    └──           <- `deeplight` package
 |    ├── hcprep/
-|    |    └──            <- 'hcprep' package
+|    |    └──           <- 'hcprep' package
 |    ├── modules/
-|    |    └──            <- 'modules' package
-|    └── setup.py        <- Makes 'deeplight', `hcprep`, and `modules` pip-installable (pip install -e .)  
+|    |    └──           <- 'modules' package
+|    └── setup.py       <- Makes 'deeplight', `hcprep`, and `modules` pip-installable (pip install -e .)  
 ```
 
 
