@@ -61,7 +61,8 @@ class model(object):
     if self.pretrained:
       self._path_pretrained_weights = os.path.join(
         os.path.dirname(deeplight.__file__),
-        'three', 'pretrained_model',
+        'three',
+        'pretrained_model',
         'model-3D_DeepLight_desc-pretrained_model.hdf5'
       )
       self.load_weights(self._path_pretrained_weights)
