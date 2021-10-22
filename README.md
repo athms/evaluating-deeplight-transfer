@@ -1,13 +1,43 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
-This repository contains two python packages, which are written for Python 3.6: 
+This repository contains three python packages, which are written for Python 3.6 (see [src/](src/)): 
 - `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services).
 - `deeplight` is a simple python package that allows to easily apply two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below) to whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
 - `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
+## 0. Project Organization
+
+```bash
+├── poetry.lock        <- Details of used package versions
+├── pyproject.toml     <- Lists installed dependencies
+├── README.md          <- This README file
+├── .gitignore         <- Specifies files that .git should ignore
+├── data/
+|    └──sub-*          <- Preprocessed data for each HCP subject (see `scripts/download.py` and `scripts/preprocess.py`)
+|        └──anat/      <- Preprocessed anatomical data
+|        └──func/      <- Preprocessed functional data
+|
+├── scrips/
+|    ├── decode.py      <- An example of how to decode fMRI data with `deeplight`
+|    ├── download.py    <- An example of how to download the preprocessed HCP fMRI data with `hcprep`
+|    ├── interpret.py   <- An example of how to interpret fMRI data with `deeplight`
+|    └── preprocess.sh  <- An example of how to preprocess fMRI data with `hcprep`
+|    └── train.py       <- An example of how to train with `hcprep`
+|
+└── src/
+|    ├── deeplight/
+|    |    └──            <- `deeplight` package
+|    ├── hcprep/
+|    |    └──            <- 'hcprep' package
+|    ├── modules/
+|    |    └──            <- 'modules' package
+|    └── setup.py        <- Makes 'deeplight', `hcprep`, and `modules` pip-installable (pip install -e .)  
+```
+
+
 ## 1. Install
-`deeplight` and `hcprep` are written for Python 3.6 and require a working Python environment running on your computer ([Anaconda Distribution](https://www.anaconda.com/distribution/) is recommended).
+`deeplight` and `hcprep` are written for Python 3.6 and require a working Python environment running on your computer ([pyenv](https://github.com/pyenv/pyenv) is recommended for Python version management).
 
 Clone and switch to this repository:
 ```bash
@@ -15,19 +45,15 @@ git clone https://github.com/athms/evaluating-deeplight-transfer.git
 cd evaluating-deeplight-transfer
 ```
 
-Install all dependencies listed in [`environment.yml`](environment.yml):
+This project uses [Python Poetry](https://python-poetry.org/) for dependency management. To install all required dependencies, run:
 ```bash
-conda env create -f environment.yml
+poetry install
 ```
 
-Activate the new environment:
+To also install `deeplight`, `hcprep`, and `modules` in your `poetry` environment, run:
 ```bash
-conda activate evaluating-deeplight-transfer
-```
-
-Install `deeplight`, `hcprep`, and `modules` with pip3:
-```bash
-pip3 install -e .
+cd src/
+poetry run pip3 install -e .
 ```
 
 
@@ -84,7 +110,7 @@ Importantly, both DeepLight architectures operate on the level of individual who
 
 To interpret the decoding decisions of the two DeepLight architectures, relating their decoding decisions to the fMRI data, `deeplight` makes use of the [LRP technique](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130140). The LRP technique decomposes individual decoding decisions of a DL model into the contributions of the individual input features (here individual voxel activities) to these decisions. 
 
-Both deeplight architectures implement basic `fit`, `decode`, and `interpret` functions, next to other functionalities. For details on how to {train, decode, interpret} with `deeplight`, see the example scripts in [examples/](examples/).
+Both deeplight architectures implement basic `fit`, `decode`, and `interpret` functions, next to other functionalities. For details on how to {train, decode, interpret} with `deeplight`, see the scripts in [scripts/](scripts/).
 
 For further methdological details regarding the two DeepLight architectures, see the upcoming preprint.
 
@@ -92,4 +118,11 @@ For further methdological details regarding the two DeepLight architectures, see
 
 
 ## 4. Example scripts
-You can find a set of example python scripts in [examples/](examples/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures implemented in `deeplight`.
+You can find a set of example python scripts in [scripts/](scripts/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures implemented in `deeplight`.
+
+You can run individual scripts in your `poetry`environment with: 
+```bash
+cd scripts/
+poetry run python <SCRIPT NAME>
+```
+
