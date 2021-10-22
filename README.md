@@ -1,7 +1,7 @@
 # Evaluating deep transfer learning for whole-brain cognitive decoding
 
 This README file contains the following sections:
-- [What is the purpose of this project](#What-is-the-purpose-of-this-repository?)
+- [Project description](#Project-description)
 - [Repository organization](#Repository-organization)
 - [Installation](#Installation)
 - [Packages](#Packages)
@@ -10,12 +10,11 @@ This README file contains the following sections:
 - [Basic usage](#Basic-usage)
 
 
-## What is the purpose of this repository?
+## Project description
 
-This repository contains three python packages, which are written for Python 3.6 (see [src/](src/)): 
+This project provides two main packages, which are written for Python 3.6 (see [src/](src/)): 
 - `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services).
 - `deeplight` is a simple python package that allows to easily apply two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below) to whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
-- `modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
 ## Repository organization
@@ -125,6 +124,11 @@ Both deeplight architectures implement basic `fit`, `decode`, and `interpret` fu
 For further methdological details regarding the two DeepLight architectures, see the upcoming preprint.
 
 **Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to a high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
+
+
+### Modules
+
+`modules` is a fork of the `modules` module from [interprettensor](https://github.com/VigneshSrinivasan10/interprettensor), which `deeplight` uses to build the 2D-DeepLight architecture. Note that `modules` is licensed differently from the other python packages in this repository (see [modules/LICENSE](modules/LICENSE)).
 
 
 ## Basic usage
