@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "evaluating-deeplight-transfer"
+version = "0.1.0"
+description = "Transfer learning with DeepLight"
+authors = ["Armin W. Thomas <athms@stanford.edu>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6.1,<4.0"
+boto3 = "1.12.34"
+botocore = "1.15.39"
+einops = "0.3.2"
+Keras = "2.2.4"
+matplotlib = "3.3.4"
+nilearn = "0.7.0"
+numpy = "1.19.5"
+tensorflow = "1.12.0"
+tqdm = "4.60.0"
+pandas = "1.1.5"
+innvestigate = "1.0.8"
+h5py = "2.10.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
