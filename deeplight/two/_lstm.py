@@ -5,7 +5,8 @@ from modules import Module
 
 class LSTM(Module):
     """LSTM cell."""
-    def __init__(self,
+    def __init__(
+      self,
       dim=64,
       input_dim=None,
       batch_size=32,
@@ -184,7 +185,8 @@ class LSTM(Module):
       return self._lrp(R)
 
 
-    def __epsilon_lrp(self,
+    def __epsilon_lrp(
+      self,
       hin,
       weights,
       biases,
@@ -296,7 +298,8 @@ class LSTM(Module):
 
 class LSTM_bidirectional(Module):
     """Bi-directional LSTM cell."""
-    def __init__(self,
+    def __init__(
+      self,
       dim,
       input_dim=None,
       batch_size=None,

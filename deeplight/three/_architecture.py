@@ -56,7 +56,9 @@ def make_architecture(
   
   model = keras.models.Sequential()
 
-  model.add(keras.layers.InputLayer(input_shape=[*input_shape, 1]))
+  model.add(
+    keras.layers.InputLayer(input_shape=[*input_shape, 1])
+  )
 
 
   model.add(

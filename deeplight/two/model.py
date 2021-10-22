@@ -12,8 +12,8 @@ import deeplight
 
 
 class model(object):
-  """2D-DeepLight."""
-  def __init__(self,
+  def __init__(
+    self,
     n_states: int = 16,
     pretrained: bool = True,
     batch_size: int = 32,
@@ -67,6 +67,7 @@ class model(object):
           keep_prob=self._keep_prob,
           return_logits=self.return_logits
         )
+      # TODO: don't do hard-coded reshape
       self._volume = tf.placeholder(
         tf.float32,
         [self.batch_size*self.input_shape[0],
@@ -85,41 +86,70 @@ class model(object):
     if self.pretrained:
       self.load_weights(self._path_pretrained_tvars)
 
-  def load_weights(self, path, verbose=None):
+  def load_weights(
+    self,
+    path: str,
+    verbose=None
+    ) -> None:
     """load model weights from path."""
     verbose = verbose if verbose is not None else self.verbose
-    stored_tvars = np.load(path, allow_pickle=True)[()]
+    target_tvars = np.load(path, allow_pickle=True)[()]
     for tv in self._tvars:
       try:
-        self.sess.run(tv.assign(stored_tvars[str(tv)]))
+        self.sess.run(tv.assign(target_tvars[str(tv)]))
       except:
         if verbose:
           print('Cannot load weights for {} from {}, as shapes do not match'.format(str(tv), path))
         continue
   
-  def save_weights(self, path):
+  def save_weights(
+    self,
+    path
+    ) -> None:
     """save model weights to path."""
-    tvars = self.sess.run(self._tvars)
-    tvars_out = {str(tn): tv for tn, tv in zip(self._tvars, tvars)}
+    tvars_out = {
+      str(tn): tv for tn, tv in zip(self._tvars, self.sess.run(self._tvars))
+    }
     np.save(path, tvars_out)
 
-  def _stack_volumes(self, volume):
+  def _stack_volumes(
+    self,
+    volume):
     """merge batch and z-axis"""
-    return rearrange(volume, 'b z y x c -> (b z) y x c', z=self.input_shape[2])
+    return rearrange(
+      volume,
+      'b z y x c -> (b z) y x c',
+      z=self.input_shape[2]
+    )
   
-  def _unstack_volumes(self, volume):
+  def _unstack_volumes(
+    self,
+    volume):
     """unmerge batch and z-axis"""
-    return rearrange(volume, '(b z) y x c -> b z y x c', z=self.input_shape[2])
+    return rearrange(
+      volume,
+      '(b z) y x c -> b z y x c',
+      z=self.input_shape[2]
+    )
 
-  def _tranpose_volumes(self, volume):
+  def _tranpose_volumes(
+    self,
+    volume):
     """tranpose (x, y, z) dimensions"""
-    return rearrange(volume, 'b x y z c  -> b z y x c')
+    return rearrange(
+      volume,
+      'b x y z c  -> b z y x c'
+    )
 
-  def _add_channel_dim(self, volume):
+  def _add_channel_dim(
+    self,
+    volume):
     """add channel dimension to volume"""
     return np.expand_dims(volume, -1)
 
-  def decode(self, volume):
+  def decode(
+    self,
+    volume):
     """Decode cognitive states for volume.
 
     Args:
@@ -139,7 +169,8 @@ class model(object):
           }
         )
 
-  def fit(self,
+  def fit(
+    self,
     train_files: list,
     validation_files: list,
     onehot_idx: int,
@@ -150,7 +181,8 @@ class model(object):
     validation_steps: int = 1000,
     output_path: str = 'out/',
     shuffle_buffer_size: int = 500,
-    n_workers: int = 4):
+    n_workers: int = 4
+    ) -> pd.DataFrame:
     """Fit the model.
 
     Args:
@@ -213,8 +245,8 @@ class model(object):
         logits=logits,
         labels=onehot)
       self._avg_xentropy = tf.reduce_mean(self._xentropy)
-      optimizer = tf.train.AdamOptimizer(learning_rate)
-      self._optimizer_step = optimizer.minimize(self._avg_xentropy)
+      self._optimizer = tf.train.AdamOptimizer(learning_rate)
+      self._optimizer_step = self._optimizer.minimize(self._avg_xentropy)
 
     with tf.variable_scope('metrics'):
       pred = tf.argmax(logits, axis=1)
@@ -233,11 +265,21 @@ class model(object):
       print('\n\nTraining epoch: {}'.format(epoch))
     
       np.random.shuffle(train_files)
-      self.sess.run(iterator.initializer, feed_dict={files: train_files})
-      xe_train, acc_train = self._train_loop(n_steps=training_steps)
+      self.sess.run(
+        iterator.initializer,
+        feed_dict={files: train_files}
+      )
+      xe_train, acc_train = self._train_loop(
+        n_steps=training_steps
+      )
       
-      self.sess.run(iterator.initializer, feed_dict={files: validation_files})
-      xe_val, acc_val = self._val_loop(n_steps=validation_steps)
+      self.sess.run(
+        iterator.initializer,
+        feed_dict={files: validation_files}
+      )
+      xe_val, acc_val = self._val_loop(
+        n_steps=validation_steps
+      )
 
       history.append(
         pd.DataFrame(
@@ -253,11 +295,16 @@ class model(object):
       )
       pd.concat(history).to_csv(output_path+'history.csv')
 
-      self.save_weights(path=output_path+"epoch-{:03d}.npy".format(epoch))
+      self.save_weights(
+        path=output_path+"epoch-{:03d}.npy".format(epoch)
+      )
 
     return pd.concat(history)
 
-  def _train_loop(self, n_steps):
+  def _train_loop(
+    self,
+    n_steps: int
+    ) -> Tuple[float, float]:
     """Perform a training loop for n_steps
     """
     xe, acc = 0, 0
@@ -283,7 +330,10 @@ class model(object):
           break
     return xe / float(step), acc / float(step)
 
-  def _val_loop(self, n_steps):
+  def _val_loop(
+    self,
+    n_steps: int
+    )  -> Tuple[float, float]:
     """Perform a validation loop for n_steps (no weight updates!)
     """
     xe, acc = 0, 0
@@ -324,9 +374,16 @@ class model(object):
         )
         # backpropagate relevances
         for layer in self.model.modules[::-1]:
-          self._R = self.model.lrp_layerwise(layer, self._R, 'epsilon', 1e-3)
+          self._R = self.model.lrp_layerwise(
+            layer=layer,
+            R=self._R,
+            lrp_var='epsilon',
+            param=1e-3
+          )
 
-  def interpret(self, volume):
+  def interpret(
+    self,
+    volume):
     """Interpret decoding decision for volume.
 
     Args:
@@ -336,7 +393,9 @@ class model(object):
         array: relevance values for each voxel of volume
     """
     if self._R is None:
-      raise NotImplementedError('LRP is not initialized. Please call .setup_lrp() first.')
+      raise NotImplementedError(
+        'LRP is not initialized. Please call .setup_lrp() first.'
+      )
     volume = self._add_channel_dim(volume)
     volume = self._tranpose_volumes(volume)
     volume = self._stack_volumes(volume)

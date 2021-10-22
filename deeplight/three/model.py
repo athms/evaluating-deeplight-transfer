@@ -3,7 +3,7 @@ import os
 import numpy as np
 import warnings
 import tensorflow as tf
-import innvestigate
+from innvestigate.analyzer.relevance_based.relevance_analyzer import LRPSequentialPresetBFlat
 from einops import rearrange
 from typing import Tuple
 from ._architecture import make_keras_architecture, make_tf_architecture
@@ -12,7 +12,6 @@ import deeplight
 
 
 class model(object):
-  """3D-DeepLight"""
   def __init__(
     self,
     n_states: int = 16,
@@ -60,8 +59,11 @@ class model(object):
     )
 
     if self.pretrained:
-      self._path_pretrained_weights = os.path.join(os.path.dirname(deeplight.__file__),
-        'three', 'pretrained_model', 'model-3D_DeepLight_desc-pretrained_model.hdf5')
+      self._path_pretrained_weights = os.path.join(
+        os.path.dirname(deeplight.__file__),
+        'three', 'pretrained_model',
+        'model-3D_DeepLight_desc-pretrained_model.hdf5'
+      )
       self.load_weights(self._path_pretrained_weights)
 
   def load_weights(
@@ -74,7 +76,10 @@ class model(object):
       try:
         model_layer.set_weights(stored_model_layer.get_weights())
       except:
-        print('Cannot load weights for layer {} from {}, as shapes do not match'.format(model_layer.name, path))
+        print(
+          'Cannot load weights for layer {} from {}, as shapes do not match'.format(
+            model_layer.name, path)
+        )
 
   def save_weights(
     self,
@@ -88,7 +93,10 @@ class model(object):
     self,
     volume):
     """tranpose (x, y, z) dimensions"""
-    return rearrange(volume, 'b x y z c  -> b z y x c')
+    return rearrange(
+      volume,
+      'b x y z c  -> b z y x c'
+    )
 
   def _add_channel_dim(
     self,
@@ -214,7 +222,9 @@ class model(object):
   def setup_lrp(self) -> None:
     """Setup LRP for 3D-DeepLight."""
     if self.return_logits is False:
-      warnings.warning('"'"return_logits"'" should be set to "'"True"'" when computing LRP.')
+      warnings.warning(
+        '"'"return_logits"'" should be set to "'"True"'" when computing LRP.'
+      )
     
     if self.verbose:
       print("\tSetting up LRP analyzer..")
@@ -227,10 +237,13 @@ class model(object):
       return_logits=self.return_logits
     )
     
-    for model_layer, stored_model_layer in zip(analyzer_model.layers, self.model.layers):
-      model_layer.set_weights(stored_model_layer.get_weights())
+    for model_layer, stored_model_layer in zip(
+      analyzer_model.layers, self.model.layers):
+      model_layer.set_weights(
+        stored_model_layer.get_weights()
+      )
     
-    self._analyzer = innvestigate.analyzer.relevance_based.relevance_analyzer.LRPSequentialPresetBFlat(
+    self._analyzer = LRPSequentialPresetBFlat(
       model=analyzer_model,
       neuron_selection_mode="index",
       epsilon=1e-6
