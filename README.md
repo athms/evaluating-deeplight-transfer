@@ -5,9 +5,9 @@ This README file contains the following sections:
 - [Repository organization](#Repository-organization)
 - [Installation](#Installation)
 - [Packages](#Packages)
-    - [HCPprep](#HCPprep)
+    - [HCPprep](#HCPrep)
     - [DeepLight](#DeepLight)
-- [Usage](#Usage)
+- [Basic usage](#Basic-usage)
 
 
 ## What is the purpose of this repository?
@@ -127,7 +127,7 @@ For further methdological details regarding the two DeepLight architectures, see
 **Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to a high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
 
 
-## Usage
+## Basic usage
 You can find a set of example python scripts in [scripts/](scripts/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures implemented in `deeplight`.
 
 You can run individual scripts in your `poetry`environment with: 
