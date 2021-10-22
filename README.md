@@ -13,10 +13,6 @@ This repository contains three python packages, which are written for Python 3.6
 ├── pyproject.toml     <- Lists installed dependencies
 ├── README.md          <- This README file
 ├── .gitignore         <- Specifies files that .git should ignore
-├── data/
-|    └──sub-*          <- Preprocessed data for each HCP subject (see `scripts/download.py` and `scripts/preprocess.py`)
-|        └──anat/      <- Preprocessed anatomical data
-|        └──func/      <- Preprocessed functional data
 |
 ├── scrips/
 |    ├── decode.py      <- An example of how to decode fMRI data with `deeplight`
