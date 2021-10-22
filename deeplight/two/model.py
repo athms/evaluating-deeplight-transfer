@@ -360,7 +360,9 @@ class model(object):
     """Setup LRP computation, as specified in Thomas et al., 2021.
     """
     if self.return_logits is False:
-        warnings.warning('"'"return_logits"'" should be set to "'"True"'" when computing LRP.')
+        warnings.warning(
+          '"'"return_logits"'" should be set to "'"True"'" when computing LRP.'
+        )
     if self.verbose:
         print("\tSetting up LRP analyzer..")
     with tf.variable_scope('relevance', reuse=tf.AUTO_REUSE):
@@ -375,7 +377,7 @@ class model(object):
         # backpropagate relevances
         for layer in self.model.modules[::-1]:
           self._R = self.model.lrp_layerwise(
-            layer=layer,
+            m=layer,
             R=self._R,
             lrp_var='epsilon',
             param=1e-3
