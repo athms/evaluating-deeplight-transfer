@@ -282,7 +282,7 @@ def main():
       
       # axial slices
       plotting.plot_stat_map(
-        stat_map=mean_state_relevance_img,
+        stat_map_img=mean_state_relevance_img,
         display_mode='z',
         cut_coords=30,
         cmap=plt.cm.seismic,
