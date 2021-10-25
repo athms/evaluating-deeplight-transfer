@@ -12,9 +12,10 @@ This README file contains the following sections:
 
 ## Project description
 
-This project provides two main packages, which are written for python 3.6 (see [src/](src/)): 
-- `hcprep`is a simple python package that allows to easily download the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP) [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services) and to transform these data into the [tensorflow records data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).
-- `deeplight` is a simple python package that allows to easily apply two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below) to whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
+This project provides two main packages (see [src/](src/)) that allow to apply the DeepLight framework to the task-fMRI data of the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP): 
+- `deeplight` is a simple python package that provides easy access to two distinct DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below), which were designed for whole-brain cognitive decoding from fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six out of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
+- `hcprep`is a simple python package that allows to easily download the HCP [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services) and to transform these data into the [tensorflow records data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).
+
 
 
 ## Repository organization
