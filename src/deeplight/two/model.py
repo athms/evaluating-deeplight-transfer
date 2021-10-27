@@ -12,17 +12,7 @@ import deeplight
 
 
 class model(object):
-  def __init__(
-    self,
-    n_states: int = 16,
-    pretrained: bool = True,
-    batch_size: int = 32,
-    return_logits: bool = True,
-    verbose: bool = True,
-    name: str = '2D',
-    input_shape: Tuple[int, int, int] = (91, 109, 91)
-    ) -> None:
-    """A basic implementation of the 2D-DeepLight architecture
+  """A basic implementation of the 2D-DeepLight architecture
     as published in Thomas et al., 2021.
 
     Args:
@@ -37,6 +27,16 @@ class model(object):
         input_shape (int, optional): Shape of input as (x, y, z)
             Defaults to MNI152NLin6Asym with shape (x: 91, y: 109, z: 91)
     """
+  def __init__(
+    self,
+    n_states: int = 16,
+    pretrained: bool = True,
+    batch_size: int = 32,
+    return_logits: bool = True,
+    verbose: bool = True,
+    name: str = '2D',
+    input_shape: Tuple[int, int, int] = (91, 109, 91)
+    ) -> None:
     self.architecture = name
     self.pretrained = pretrained
     self.input_shape = input_shape # fixed for MNI152NLin6Asym space
