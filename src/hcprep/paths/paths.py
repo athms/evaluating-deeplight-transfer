@@ -62,7 +62,6 @@ def path_bids_anat_mni(
 
     Args:
         subject: Integer ID of HCP subject
-        task: String ID of HCP task.
         path: Path to local BIDS directory.
     """
     return os.path.join(
@@ -93,7 +92,6 @@ def path_bids_func_mask_mni(
         "func",
         "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-preproc_brain_mask.nii.gz".format(subject, task, run)
     )
-
 
 
 def path_bids_tfr(
