@@ -56,8 +56,6 @@ def path_bids_func_mni(
 
 def path_bids_anat_mni(
     subject,
-    task,
-    run,
     path):
     """Return the path to the local anatomical scan
     of a subject.
@@ -71,7 +69,7 @@ def path_bids_anat_mni(
         path,
         "sub-{}".format(subject),
         "anat", 
-        "sub-{}_task-{}_run-{}_space-MNI152NLin6Asym_res-2_desc-preproc_T1w.nii.gz".format(subject, task, run)
+        "sub-{}_space-MNI152NLin6Asym_res-2_desc-preproc_T1w.nii.gz".format(subject)
     )
 
 

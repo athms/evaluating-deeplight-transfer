@@ -192,7 +192,7 @@ def download_subject_data(
         'MNINonLinear/' +
         'T1w.nii.gz'.format(task, run)
     )
-    output_file = paths.path_bids_anat_mni(subject, task, run, output_path)
+    output_file = paths.path_bids_anat_mni(subject, output_path)
     download_file_from_bucket(bucket, bucket_id, output_file)
 
     identifier = (
