@@ -21,10 +21,10 @@ This project provides two main packages (see [src/](src/)) that allow to apply t
 ## Repository organization
 
 ```bash
-├── poetry.lock         <- Details of used package versions
-├── pyproject.toml      <- Lists installed dependencies
+├── poetry.lock         <- Overview of project dependencies
+├── pyproject.toml      <- Lists details of installed dependencies
 ├── README.md           <- This README file
-├── .gitignore          <- Specifies files that .git should ignore
+├── .gitignore          <- Specifies files that git should ignore
 |
 ├── scrips/
 |    ├── decode.py      <- An example of how to decode fMRI data with `deeplight`
