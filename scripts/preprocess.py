@@ -71,8 +71,7 @@ def main():
         ]
         if not np.all(filechecks):
           print(
-            'Skipping subejct {} task {} run {},"\
-            "because BIDS data not fully present.'.format(
+            'Skipping subject {} task {} run {}, because BIDS data not fully present.'.format(
               subject, task, run
             )
           )
