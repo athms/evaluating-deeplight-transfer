@@ -12,8 +12,8 @@ This README file contains the following sections:
 
 ## Project description
 
-This project provides two main packages (see [src/](src/)) that allow to apply DeepLight to the task-fMRI data of the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP): 
-- `deeplight` is a simple python package that provides easy access to two DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below), which are designed for cognitive decoding of whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
+This project provides two main packages (see [src/](src/)) that allow to apply DeepLight (see [below](#DeepLight)) to the task-fMRI data of the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP): 
+- `deeplight` is a simple python package that provides easy access to two pre-trained DeepLight architectures (2D-DeepLight and 3D-DeepLight; see below), designed for cognitive decoding of whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
 - `hcprep`is a simple python package that allows to easily download the HCP [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services) and to transform these data into the [tensorflow records data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).
 
 
@@ -47,7 +47,7 @@ This project provides two main packages (see [src/](src/)) that allow to apply D
 ## Installation
 `deeplight` and `hcprep` are written for python 3.6 and require a working python environment running on your computer (we generally recommend [pyenv](https://github.com/pyenv/pyenv) for python version management).
 
-Clone and switch to this repository:
+First, clone and switch to this repository:
 ```bash
 git clone https://github.com/athms/evaluating-deeplight-transfer.git
 cd evaluating-deeplight-transfer
@@ -58,7 +58,7 @@ This project uses [python poetry](https://python-poetry.org/) for dependency man
 poetry install
 ```
 
-To also install `deeplight`, `hcprep`, and `modules` in your poetry environment, run:
+To then install `deeplight`, `hcprep`, and `modules` in your poetry environment, run:
 ```bash
 cd src/
 poetry run pip3 install -e .
@@ -68,12 +68,12 @@ poetry run pip3 install -e .
 ## Packages
 
 ### HCPrep
-`hcprep` stores data locally in the [Brain Imaging Data Structure](https://bids.neuroimaging.io) (BIDS) format.
+`hcprep` stores the HCP task-fMRI data data locally in the [Brain Imaging Data Structure](https://bids.neuroimaging.io) (BIDS) format.
 
-To make the fMRI data usable for DL analyses with TensorFlow, `hcprep` can clean the downloaded fMRI data and store these in the [TFRecords data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).  
+To make fMRI data usable for DL analyses with TensorFlow, `hcprep` can clean the downloaded fMRI data and store these in the [TFRecords data format](https://www.tensorflow.org/tutorials/load_data/tfrecord).  
 
 **Getting data access:**
-To download the HCP task-fMRI data, you will also need AWS access to the HCP public data directory. A detailed instruction can be found [here](https://wiki.humanconnectome.org/display/PublicData/How+To+Connect+to+Connectome+Data+via+AWS). Make sure to safely store the `ACCESS_KEY` and `SECRET_KEY`; they are required to access the data via the AWS S3 storage system. 
+To download the HCP task-fMRI data, you will need AWS access to the HCP public data directory. A detailed instruction can be found [here](https://wiki.humanconnectome.org/display/PublicData/How+To+Connect+to+Connectome+Data+via+AWS). Make sure to safely store the `ACCESS_KEY` and `SECRET_KEY`; they are required to access the data via the AWS S3 storage system. 
 
 **AWS configuration:**
 Setup your local AWS client (as described [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)) and add the following profile to '~/.aws/config'
@@ -120,11 +120,11 @@ Importantly, both DeepLight architectures operate on the level of individual who
 
 To interpret the decoding decisions of the two DeepLight architectures, relating their decoding decisions to the fMRI data, `deeplight` makes use of the [LRP technique](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130140). The LRP technique decomposes individual decoding decisions of a DL model into the contributions of the individual input features (here individual voxel activities) to these decisions. 
 
-Both deeplight architectures implement basic `fit`, `decode`, and `interpret` functions, next to other functionalities. For details on how to {train, decode, interpret} with `deeplight`, see the scripts in [scripts/](scripts/).
+Both deeplight architectures implement basic `fit`, `decode`, and `interpret` methods, next to other functionalities. For details on how to {train, decode, interpret} with `deeplight`, see [scripts/](scripts/).
 
 For further methdological details regarding the two DeepLight architectures, see the upcoming preprint.
 
-**Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPUs instead of a GPU, due to a high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
+**Note** that we currently recommend to run any applications of `interpret` with 2D-DeepLight on CPU instead of GPU, due to its high memory demand (assuming that your available CPU memory is larger than your available GPU memory). This switch can be made by setting the environment variable `export CUDA_VISIBLE_DEVICES=""`. We are currently working on reducing the overall memory demand of `interpret` with 2D-DeepLight and will push a code update soon. 
 
 
 ### Modules
@@ -133,7 +133,7 @@ For further methdological details regarding the two DeepLight architectures, see
 
 
 ## Basic usage
-You can find a set of example python scripts in [scripts/](scripts/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures implemented in `deeplight`.
+You can find a set of example python scripts in [scripts/](scripts/), which illustrate how to download and preprocess task-fMRI data from the Human Connectome Project with `hcprep` and how to {train on, decode, interpret} fMRI data with the two DeepLight architectures of `deeplight`.
 
 You can run individual scripts in your `poetry`environment with: 
 ```bash
