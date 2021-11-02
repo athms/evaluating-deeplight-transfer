@@ -161,8 +161,7 @@ def main():
 
   if verbose:
     print(
-      '\nInterpreting predictions for task:"\
-      "{}, subject: {}, run: {}'.format(
+      '\nInterpreting predictions for task: {}, subject: {}, run: {}'.format(
         task, subject, run
       )
     )
