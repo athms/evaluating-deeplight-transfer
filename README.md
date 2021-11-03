@@ -12,11 +12,11 @@ This README file contains the following sections:
 
 ## Project description
 
-This repository supplements the following preprint:
+This repository supplements our preprint:
 
 Thomas, A. W., Lindenbgerger, U., Samek, W., Müller, K.-R. (2021). Evaluating deep transfer learning for whole-brain cognitive decoding. *arXiv preprint* [arXiv:2111.01562](https://arxiv.org/abs/2111.01562)
 
-More specifically, this repository provides two main packages (`deeplight` and `hcprep`; see below), which allow to easily apply the DeepLight framework to the task-fMRI data of the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP): 
+With this repository we provide access to two main packages (`deeplight` and `hcprep`; see below), which allow to easily apply the DeepLight framework to the task-fMRI data of the [Human Connectome Project](http://www.humanconnectomeproject.org) (HCP): 
 - `deeplight` is a simple python package that provides easy access to two pre-trained DeepLight architectures (2D-DeepLight and 3D-DeepLight; see [below](#DeepLight)), which are designed for cognitive decoding of whole-brain fMRI data. Both architecturs were pre-trained with the fMRI data of 400 individuals in six of the seven HCP experimental tasks (all tasks except for the working memory task, which we left out for testing purposes; [click here for details on the HCP data](https://www.sciencedirect.com/science/article/abs/pii/S1053811913005272?via%3Dihub)). 
 - `hcprep`is a simple python package that allows to easily download the HCP [task-fMRI data](https://www.humanconnectome.org/study/hcp-young-adult/project-protocol/task-fmri) in a *preprocessed* format via the [Amazon Web Services (AWS) S3 storage system](https://www.humanconnectome.org/study/hcp-young-adult/article/hcp-s1200-release-now-available-amazon-web-services) and to transform these data into the [tensorflow records data format](https://www.tensorflow.org/tutorials/load_data/tfrecord), which is optimised for the training of DL models with [tensorflow](https://www.tensorflow.org).
 
